@@ -22,3 +22,7 @@ class ApiError extends Error {
 }
 
 export default ApiError;
+
+
+//  a custom error class used in backend (Node.js) to handle API errors in a clean and 
+//  organized way.

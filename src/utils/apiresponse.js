@@ -8,3 +8,7 @@ class apiresponse{
 }
 
 export default apiresponse;
+
+
+// it simpley standardizes the response format across your application,
+//  making it easier to handle responses consistently.

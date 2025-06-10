@@ -19,11 +19,6 @@ export const upload = multer({
 
 
 
-
-
-
-
-
 // Multer is a middleware or library package for Node.js that simplifies the process of handling
 //  file uploads and storing them on the server
 

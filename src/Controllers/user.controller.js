@@ -2,7 +2,7 @@ import asynchandler from "../utils/asynchandler.js";
 
 
 const registeruser= asynchandler(async (req, res) => {
-    res.status(201).json({
+    res.status(200).json({
         message: "User registered successfully",
         success: true,
     });

@@ -1,5 +1,5 @@
 import Router from 'express';
-import registeruser from '../Controllers/user.controller.js'
+import {registeruser} from '../Controllers/user.controller.js'
 import { upload } from '../middlewares/multer.middleware.js';
 
 const userRouter = Router();

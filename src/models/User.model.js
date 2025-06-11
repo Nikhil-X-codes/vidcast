@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your-access-secret';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret';
@@ -30,12 +30,10 @@ const userSchema = new Schema({
   avatar: {
     type: String,
     required: true,
-    default: ""
   },
   coverimage: {
     type: String,
     required: true,
-    default: ""
   },
   password: {
     type: String,

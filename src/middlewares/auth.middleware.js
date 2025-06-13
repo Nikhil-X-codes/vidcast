@@ -12,7 +12,6 @@ export const verifyJWT = asynchandler(async (req, res, next) => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
-        console.log("Received Token:", token);
         if (!token) {
             throw new ApiError(401, "Unauthorized request");
         }
@@ -20,7 +19,6 @@ export const verifyJWT = asynchandler(async (req, res, next) => {
         let decodedToken;
         try {
             decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-            console.log("Decoded token:", decodedToken);
         } 
         catch (error) {
             if (error.name === "TokenExpiredError") {

@@ -91,7 +91,7 @@ export const User = mongoose.model("User", userSchema);
 // tokens->is issued to a user after they successfully log in. It is used to identify the user in future requests without 
 // needing to log in again.
 
-// access token->is a short-lived token that is used to access protected resources. It is usually valid for a few minutes to an hour.
+// access token->is a short-lived token that is used to access protected resources. It is usually valid for a few minutes to an hour.it an be easily sent in headers without much risk
 
 
 // refresh token->is a long-lived token that is used to obtain a new access token when the current one expires. 

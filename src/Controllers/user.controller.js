@@ -251,7 +251,7 @@ const forgetPassword = asynchandler(async (req, res) => {
 
     await user.save();
 
- const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetpassword/${resetToken}`;
+   const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetpassword/${resetToken}`;
 
     const message = `
         <h2>Password Reset Request</h2>
@@ -309,7 +309,6 @@ const updateUserDetails = asynchandler(async (req, res) => {                    
         }
     });
 });
-
 
 
 const updateimages = asynchandler(async (req, res) => {                                              // this function updates the user's avatar and cover image

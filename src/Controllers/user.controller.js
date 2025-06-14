@@ -3,6 +3,8 @@ import { User } from "../models/User.model.js";
 import uploadoncloudinary from "../utils/cloudinary.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
+import jwt from "jsonwebtoken";
+import sendEmail from "../utils/Sendmail.js";
 
 const registeruser = asynchandler(async (req, res) => {
     const { username, email, password } = req.body;
@@ -186,9 +188,175 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {          // 
   
   catch (error) {
     next(error); 
-  }})                                          
+  }})    
+   
 
-export { registeruser, loginuser, logoutuser,refreshAccessToken };
+ const changePassword = asynchandler(async (req, res) => {                              // this function changes the user's password after verifying the old password
+    const { oldpassword, newpassword, confirmpassword } = req.body;
+
+    if (!oldpassword || !newpassword || !confirmpassword) {
+        throw new ApiError(400, "All password fields are required");
+    }
+
+    if (newpassword !== confirmpassword) {
+        throw new ApiError(400, "New password and confirm password do not match");
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const isMatch = await user.isPasswordmatch(oldpassword);
+    if (!isMatch) {
+        throw new ApiError(401, "Old password is incorrect");
+    }
+
+    user.password = newpassword;
+    await user.save({ validateBeforeSave: true });
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Password changed successfully")
+    );
+});
+
+const getcurrentuser = asynchandler(async (req, res) => {                                   // this function returns the current user details
+    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    return res.status(200).json(new ApiResponse(200, user, "Current user details fetched successfully"));
+}); 
+
+const forgetPassword = asynchandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400);
+        throw new Error("Please provide an email");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; 
+
+    await user.save();
+
+ const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetpassword/${resetToken}`;
+
+    const message = `
+        <h2>Password Reset Request</h2>
+        <p>If you requested a password reset, click the link below:</p>
+        <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+        <p>This link will expire in 10 minutes.</p>
+    `;
+
+    try {
+        await sendEmail({
+            to: user.email,
+            subject: "Password Reset",
+            html: message
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset link sent to email"
+        });
+    } catch (error) {
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        res.status(500);
+        throw new Error("Email could not be sent. Try again later.");
+    }
+});
+
+
+const updateUserDetails = asynchandler(async (req, res) => {                                  // this function updates the user's username and email
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+        throw new ApiError(400, "Username and email are required");
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    user.username = username.toLowerCase();
+    user.email = email.toLowerCase();
+
+    await user.save(); 
+
+    res.status(200).json({
+        message: "User details updated successfully",
+        user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+        }
+    });
+});
+
+
+
+const updateimages = asynchandler(async (req, res) => {                                              // this function updates the user's avatar and cover image
+
+    const avatarFile = req.files?.avatar?.[0];
+    const coverImageFile = req.files?.['coverimage']?.[0];
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (avatarFile) {
+        const avatarUrl = await uploadoncloudinary(avatarFile.path);
+        if (!avatarUrl) {
+            throw new ApiError(500, "Failed to upload avatar to cloud storage");
+        }
+        user.avatar = avatarUrl;
+    }
+
+    if (coverImageFile) {
+        const coverImageUrl = await uploadoncloudinary(coverImageFile.path);
+        if (!coverImageUrl) {
+            throw new ApiError(500, "Failed to upload cover image to cloud storage");
+        }
+        user.coverimage = coverImageUrl;
+    }
+
+    if (!avatarFile && !coverImageFile) {
+        throw new ApiError(400, "No image provided for update");
+    }
+
+    await user.save();
+    return res.status(200).json(new ApiResponse(200, user, "User image(s) updated successfully"));
+});
+
+
+
+
+
+
+
+  
+   
+
+export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,forgetPassword, getcurrentuser,updateUserDetails, updateimages };
 
 
 

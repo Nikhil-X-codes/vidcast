@@ -22,7 +22,7 @@ userRouter.post('/refresh', refreshAccessToken);
 
 userRouter.post('/change-password', verifyJWT, changePassword);
 
-userRouter.post('/forget-password', forgetPassword);
+userRouter.post('/resetpassword', forgetPassword);
 
 userRouter.get('/current', verifyJWT, getcurrentuser);
 

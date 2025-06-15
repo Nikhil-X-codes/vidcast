@@ -228,7 +228,7 @@ const getcurrentuser = asynchandler(async (req, res) => {                       
     return res.status(200).json(new ApiResponse(200, user, "Current user details fetched successfully"));
 }); 
 
-const forgetPassword = asynchandler(async (req, res) => {
+const forgetPassword = asynchandler(async (req, res) => {                                          // this function handles the password reset request by generating a reset token and sending it to the user's email
     const { email } = req.body;
 
     if (!email) {

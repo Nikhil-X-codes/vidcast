@@ -11,6 +11,14 @@ const videoSchema = new Schema({
     type: String,
     required: true,
   },
+    thumbnailUrl: {
+    type: String,
+    required: true,
+  },
+  thumbnailPublicId: {
+    type: String,
+    required: true,
+  },
   owner:{
     type: Schema.Types.ObjectId,
     ref: "User",

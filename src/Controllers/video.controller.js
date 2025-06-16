@@ -1,53 +1,62 @@
 import asynchandler from "../utils/asynchandler.js";
 import { Video } from "../models/Video.model.js";
-import uploadoncloudinary from "../utils/cloudinary.js";
+import {uploadoncloudinary,extractPublicIdFromUrl,deleteFromCloudinary} from "../utils/cloudinary.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
-import { captureOwnerStack } from "react";
 
 
 const videouploading = asynchandler(async (req, res) => {
-    const { title, description } = req.body;
+  const { title, description } = req.body;
 
-    const videoFile = req.files?.video;
-    const thumbnailFile = req.files?.thumbnail;
+  const videoFile = req.files?.video;
+  const thumbnailFile = req.files?.thumbnail;
 
-    if (!videoFile) {
-        throw new ApiError(400, "Please upload a video file");
-    }
+  if (!videoFile) {
+    throw new ApiError(400, "Please upload a video file");
+  }
 
-    if (!thumbnailFile) {
-        throw new ApiError(400, "Please upload a thumbnail image");
-    }
+  if (!thumbnailFile) {
+    throw new ApiError(400, "Please upload a thumbnail image");
+  }
 
-    const videoDetails = await uploadoncloudinary(videoFile.path);
-    const thumbnailDetails = await uploadoncloudinary(thumbnailFile.path);
+  const videoUrl = await uploadoncloudinary(videoFile.path);
+  const thumbnailUrl = await uploadoncloudinary(thumbnailFile.path);
 
-    if (!videoDetails || !thumbnailDetails) {
-        throw new ApiError(500, "Upload failed");
-    }
+  if (!videoUrl || !thumbnailUrl) {
+    throw new ApiError(500, "Upload failed");
+  }
 
-    const video = await Video.create({
-        title,
-        description,
-        videoUrl: videoDetails.secure_url,
-        thumbnail: thumbnailDetails.secure_url,
-    });
+  const videoPublicId = extractPublicIdFromUrl(videoUrl);
+  const thumbnailPublicId = extractPublicIdFromUrl(thumbnailUrl);
 
-    res.status(201).json(new ApiResponse("Video uploaded successfully", video));
+  const video = await Video.create({
+    title,
+    description,
+    videoUrl,
+    videoPublicId,
+    thumbnail: thumbnailUrl,
+    thumbnailPublicId,
+  });
+
+  res.status(201).json(new ApiResponse("Video uploaded successfully", video));
 });
 
 const videodeleting = asynchandler(async (req, res) => {
-    const {videoId} = req.params;
+  const { videoId } = req.params;
 
-    const video = await Video.findById(videoId);
-    if (!video) {
-        throw new ApiError(404, "Video not found");
-    }
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
 
-    await Video.deleteOne({ _id: videoId });
-    res.status(200).json(new ApiResponse("Video deleted successfully"));
-})
+  await deleteFromCloudinary(video.videoPublicId, 'video');
+  await deleteFromCloudinary(video.thumbnailPublicId, 'image');
+
+  await Video.deleteOne({ _id: videoId });
+
+  res.status(200).json(new ApiResponse("Video deleted successfully"));
+});
+
 
 const videoupdating=asynchandler(async (req,res) =>{
 
@@ -93,15 +102,18 @@ const videos= await Video.find(filter)
     .sort({ createdAt: -1 });
 
     const totalVideos = await Video.countDocuments(filter);
-    const totalPages = Math.ceil(totalVideos / limit);
 
+    if(totalVideos === 0) {
+        throw new ApiError(404, "No videos found");
+    }
+ 
     res.status(200).json(new ApiResponse("Videos fetched successfully", {
         videos,
          pagination: {
                     totalVideos,
+                    limit: parseInt(limit),
                     totalPages: Math.ceil(totalVideos / limit),
                     currentPage: parseInt(page),
-                    limit: parseInt(limit),
                 },
     }));
 
@@ -115,7 +127,6 @@ const getSingleVideo = asynchandler(async (req, res) => {
     }
     res.status(200).json(new ApiResponse("Video fetched successfully", video));
 })
-
 
 
 export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo};

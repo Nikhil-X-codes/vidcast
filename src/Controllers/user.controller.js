@@ -347,15 +347,134 @@ const updateimages = asynchandler(async (req, res) => {                         
 });
 
 
+const UserProfile = asynchandler(async (req, res) => {                          // this function fetches the user profile by username and includes subscriber count, subscribed to count, and subscription status
+    const { username } = req.params;
+
+    if (!username?.trim()) {
+        throw new ApiError(400, "Username is required");
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: { username: username.toLowerCase() }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "Subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "SubscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscriberCount: { $size: "$Subscribers" },
+                subscribedToCount: { $size: "$SubscribedTo" },
+                isSubscribed: {
+                    $in: [
+                        mongoose.Types.ObjectId(req.user?._id),
+                        {
+                            $map: {
+                                input: "$Subscribers",
+                                as: "s",
+                                in: "$$s.subscriber"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            $project: {
+                username: 1,
+                email: 1,
+                avatar: 1,
+                coverimage: 1,
+                subscriberCount: 1,
+                subscribedToCount: 1,
+                isSubscribed: 1
+            }
+        }
+    ]);
+
+    console.log("Channel Data:", channel);
+
+    if (!channel || channel.length === 0) {
+        throw new ApiError(404, "Channel not found");
+    }
 
 
 
+    res.status(200).json(new ApiResponse(200, channel[0], "User profile fetched successfully"));
+});
+
+const Watchhistory = asynchandler(async (req, res) => {
+    const history = await User.aggregate([
+        {
+            $match: { _id: new mongoose.Types.ObjectId(req.user._id) }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchhistory",
+                foreignField: "_id",
+                as: "watchHistoryVideos",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "ownerDetails",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $unwind: {
+                            path: "$ownerDetails",
+                            preserveNullAndEmptyArrays: true
+                        }
+                    },
+                    {
+                        $project: {
+                            title: 1,
+                            thumbnail: 1,
+                            views: 1,
+                            duration: 1,
+                            owner: "$ownerDetails"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                watchHistoryVideos: 1,
+            }
+        }
+    ]);
+
+   res.status(200).json(new ApiResponse(200, history[0]?.watchHistoryVideos || [], "Watch history fetched successfully"));
+});
+ 
 
 
-  
-   
-
-export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,forgetPassword, getcurrentuser,updateUserDetails, updateimages };
+export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,forgetPassword, getcurrentuser,updateUserDetails, updateimages,UserProfile,Watchhistory };
 
 
 

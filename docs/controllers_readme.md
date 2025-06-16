@@ -1,106 +1,174 @@
 # 📦 Controllers in Web Applications
 
-Controllers are functional units in an application that manage business logic. They serve as a bridge between **routes** and **database models**, processing incoming requests, performing operations, and returning appropriate responses.
+Controllers are key components in web applications that handle business logic. They act as a bridge between **routes** and **database models**, processing incoming requests and sending the appropriate responses.
 
 ---
 
-## ✅ Why Are Controllers Used?
+## ✅ Why Use Controllers?
 
 1. **Code Reusability**  
-   In production-grade systems, reusable and modular code is essential. Controllers promote separation of concerns and reusable logic.
+   Promote modular design by separating logic from routes, enabling reusable code.
 
-2. **Business Logic Encapsulation**  
-   They help developers define and isolate the core functionality of an application in a clear and maintainable way.
+2. **Encapsulation of Business Logic**  
+   Simplifies maintenance by clearly organizing application functionality.
 
 ---
 
-## ⚙️ How Are Controllers Implemented?
+## ⚙️ Implementation
 
-Controllers are typically JavaScript/TypeScript modules or classes. They are:
-- **Imported** into the application wherever needed.
-- **Exported** and **connected to routes** to handle specific HTTP requests (GET, POST, PUT, DELETE).
+Controllers are typically JavaScript/TypeScript modules:
+- Imported where needed (e.g., in route files)
+- Exported to handle various HTTP methods (GET, POST, PUT, DELETE)
 
 ---
 
 # 👤 User Controllers Overview
 
-Below are the controllers implemented in our project:
-
 ---
 
 ## 1. 🔐 Register
 
-- To register a new user, the following fields are **mandatory**:  
-  - `email`, `username`, and `password` (minimum 8 characters)  
-  - `avatar` and `cover image`
+**Description**:  
+Registers a new user.
 
-- Upon successful registration, user details are saved in **MongoDB**.
+**Required Fields**:
+- `email`
+- `username`
+- `password` (minimum 8 characters)
+- `avatar` (image)
+- `coverImage` (image)
+
+**Database**: User data is stored in **MongoDB** upon successful registration.
 
 ---
 
 ## 2. 🔓 Login
 
-- Users log in using their **email** and **password**.
+**Description**:  
+Authenticates users via email and password.
 
-- Upon login, **tokens** are generated for session management:
-  - **Access Token:**  
-    Stored in the `Authorization` header, expires in a few hours.
-  - **Refresh Token:**  
-    Stored securely in cookies, lasts longer, and helps generate new access tokens without re-login.
+**Authentication Tokens**:
+- **Access Token**:  
+  Stored in the `Authorization` header, expires in a few hours.
+- **Refresh Token**:  
+  Stored in cookies, used to obtain new access tokens.
 
 ---
 
 ## 3. 🚪 Logout
 
-- No input data is needed from the user for logout.
+**Description**:  
+Clears tokens from cookies to log the user out.
 
-- Middleware is used to authenticate the user using tokens.
-
-- On successful verification, tokens are cleared from cookies, logging out the user.
+**Process**:
+- Token verification via middleware
+- Token deletion from cookies
 
 ---
 
 ## 4. ♻️ Refresh Access Token
 
-- Refresh token is extracted from cookies and verified.
+**Description**:  
+Generates a new access token using the refresh token stored in cookies.
 
-- New **access** and **refresh tokens** are generated.
-
-- While production typically stores only refresh tokens in cookies, our project stores **both tokens** for ease of access.
+**Note**:  
+While in production only refresh tokens are usually stored in cookies, this project stores **both** tokens for development convenience.
 
 ---
 
 ## 5. 🔁 Change Password
 
-- Validates:
-  - Old password
-  - Matching new password and confirm password
+**Description**:  
+Allows users to change their password securely.
 
-- Updates the new password and saves it in the database.
+**Validation**:
+- Old password match
+- New and confirm passwords must match
 
 ---
 
 ## 6. 🧾 Get User Details
 
-- Retrieves user details using their unique MongoDB `_id`.
+**Description**:  
+Fetches user data based on their MongoDB `_id`.
 
 ---
 
 ## 7. 🆘 Forgot Password
 
-- A utility sends a **password reset link** to the user’s registered email address.
+**Description**:  
+Sends a password reset link to the user’s registered email address.
 
 ---
 
-## 8. ✏️ Update Images and User Info
+## 8. ✏️ Update User Info and Images
 
-- In production, different controllers usually manage file uploads for better structure.
+**Description**:  
+Users can update the following fields:
+- `username`
+- `email`
 
-- In our implementation, users can update only:
-  - `username`
-  - `email`
+> In production systems, image uploads are typically handled by dedicated controllers or services.
 
 ---
 
-🧩 **Note:** In real-world applications, these controller functionalities are usually broken down into separate service layers for improved scalability and maintainability.
+# 🎞️ Video Controllers Overview
+
+---
+
+## 1. ⬆️ Upload Video
+
+**Description**:  
+Users can upload a video with required metadata.
+
+**Required Fields**:
+- `title` (string)
+- `description` (string)
+- `thumbnail` (image file)
+- `video` (video file)
+
+---
+
+## 2. ❌ Delete Video
+
+**Description**:  
+Deletes a video using its `videoId`.
+
+
+
+---
+
+## 3. 📝 Update Video Details
+
+**Description**:  
+Allows updating only the `title` and `description`.
+
+❗ Thumbnail image **cannot** be updated.
+
+---
+
+## 4. 🔍 Get Videos (Search + Pagination)
+
+**Description**:  
+Returns a list of videos based on query parameters.
+
+**Query Parameters**:
+- `search`: text in `title` or `description`
+- `page`: pagination page (default: 1)
+- `limit`: number of results per page (default: 10)
+- `userId`: filter videos by user
+
+---
+
+## 5. 📄 Get Single Video
+
+**Description**:  
+Fetches a video’s complete details using its `videoId`.
+
+
+## 🧩 Developer Note
+
+In production-grade systems:
+- Controller logic is often separated into **service layers**.
+- This improves **scalability**, **testability**, and **maintainability**.
 

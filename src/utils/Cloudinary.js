@@ -17,44 +17,17 @@ const uploadoncloudinary = async (localfilePath) => {
       resource_type: 'auto',
     });
 
-    return result.url;
-  } catch (error) {
     fs.unlinkSync(localfilePath);
-    return null;
-  }
-};
 
-const extractPublicIdFromUrl = async (url) => {
-  try {
-    const parts = url.split('/');
-    const index = parts.findIndex(part => part === 'upload');
-    const publicIdWithExtension = parts.slice(index + 1).join('/');
-    const lastDot = publicIdWithExtension.lastIndexOf('.');
-    const publicId = publicIdWithExtension.substring(0, lastDot);
-
-    return publicId;
-  } catch (err) {
-    console.error("Failed to extract public_id from URL:", err);
-    return null;
-  }
-};
-
-const deleteFromCloudinary = async (publicId, resource_type = 'auto') => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: resource_type,
-    });
-
-    return result;
+    return result.secure_url;
   } catch (error) {
-    console.error("Error deleting from Cloudinary:", error);
+    if (fs.existsSync(localfilePath)) fs.unlinkSync(localfilePath);
+    console.error("Upload Error:", error);
     return null;
   }
 };
 
 
 export {
-  uploadoncloudinary,
-  extractPublicIdFromUrl,
-  deleteFromCloudinary
+  uploadoncloudinary
 };

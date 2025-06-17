@@ -1,4 +1,4 @@
-import { Router } from "express";
+import Router  from "express";
 import {likeVideo,likecomment,getLikedVideos} from "../Controllers/Like.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 

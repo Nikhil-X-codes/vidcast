@@ -1,6 +1,6 @@
 import asynchandler from "../utils/asynchandler.js";
 import { User } from "../models/User.model.js";
-import {uploadoncloudinary,extractPublicIdFromUrl,deleteFromCloudinary} from "../utils/cloudinary.js";
+import {uploadoncloudinary} from "../utils/Cloudinary.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
 import jwt from "jsonwebtoken";
@@ -318,19 +318,18 @@ const updateUserDetails = asynchandler(async (req, res) => {
 });
 
 
-const updateimages = asynchandler(async (req, res) => {                                              // this function updates the user's avatar and cover image
-
+const updateimages = asynchandler(async (req, res) => {
     const avatarFile = req.files?.avatar?.[0];
-    const coverImageFile = req.files?.['coverimage']?.[0];
+    const coverImageFile = req.files?.coverimage?.[0];
 
     const user = await User.findById(req.user._id);
-
     if (!user) {
         throw new ApiError(404, "User not found");
     }
 
+
     if (avatarFile) {
-        const avatarUrl = await uploadoncloudinary(avatarFile.path);
+        const avatarUrl = await uploadOnCloudinary(avatarFile.path);
         if (!avatarUrl) {
             throw new ApiError(500, "Failed to upload avatar to cloud storage");
         }
@@ -338,7 +337,7 @@ const updateimages = asynchandler(async (req, res) => {                         
     }
 
     if (coverImageFile) {
-        const coverImageUrl = await uploadoncloudinary(coverImageFile.path);
+        const coverImageUrl = await uploadOnCloudinary(coverImageFile.path);
         if (!coverImageUrl) {
             throw new ApiError(500, "Failed to upload cover image to cloud storage");
         }
@@ -350,11 +349,14 @@ const updateimages = asynchandler(async (req, res) => {                         
     }
 
     await user.save();
-    return res.status(200).json(new ApiResponse(200,"User image(s) updated successfully",user));
+
+    return res.status(200).json(
+        new ApiResponse(200, "User image(s) updated successfully", user)
+    );
 });
 
 
-const UserProfile = asynchandler(async (req, res) => {                          // this function fetches the user profile by username and includes subscriber count, subscribed to count, and subscription status
+const UserProfile = asynchandler(async (req, res) => {                                 // this function fetches the user profile by username and includes subscriber count, subscribed to count, and subscription status
     const { username } = req.params;
 
     if (!username?.trim()) {

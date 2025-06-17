@@ -32,7 +32,7 @@ userRouter.patch('/profile-pictures', verifyJWT, upload.fields([{ name: 'avatar'
 
 userRouter.get('/profile/:username', verifyJWT,UserProfile);
 
-userRouter.get('/watch-history', verifyJWT, Watchhistory);       // remaining testing
+userRouter.get('/watch-history', verifyJWT, Watchhistory);      // remianing real testing 
 
 
 export default userRouter;

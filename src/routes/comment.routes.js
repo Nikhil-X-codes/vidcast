@@ -1,4 +1,4 @@
-import { Router } from "express";
+import Router from "express";
 import {addComment, deleteComment,updatingComment} from "../Controllers/Comment.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 

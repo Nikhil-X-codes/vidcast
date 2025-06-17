@@ -5,6 +5,9 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/Sendmail.js";
+import bcrypt from "bcrypt";
+import mongoose from "mongoose";
+
 
 const registeruser = asynchandler(async (req, res) => {
     const { username, email, password } = req.body;
@@ -77,7 +80,7 @@ const loginuser = asynchandler(async (req, res) => {                            
 
     const {accessToken,refreshToken } = await generateAccessAndRefreshTokens(existinguser._id);
 
-    const loggedInUser = await User.findById(existinguser._id).select("-password -refreshToken");
+    const loggedInUser = await User.findById(existinguser._id).select("-refreshToken");
 
     const options = {
         httpOnly: true,
@@ -91,12 +94,13 @@ const loginuser = asynchandler(async (req, res) => {                            
         .json(
             new ApiResponse(
                 200,
+                 "User logged in successfully",
                 {
                     user: loggedInUser,
                     accessToken,
                     refreshToken
                 },
-                "User logged in successfully"
+               
             )
         );
 });
@@ -125,7 +129,7 @@ const logoutuser = asynchandler(async (req, res) => {                    // this
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(new ApiResponse(200, {}, "User logged out successfully"));
+        .json(new ApiResponse(200,"User logged out successfully", {} ));
 });
 
 
@@ -183,41 +187,40 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {          // 
       .status(200)
       .cookie("accessToken", newAccessToken, cookieOptions)
       .cookie("refreshToken", newRefreshToken, cookieOptions)
-      .json(new ApiResponse(200, { accessToken: newAccessToken, refreshToken: newRefreshToken }, "Tokens refreshed successfully"));
+      .json(new ApiResponse(200,"Tokens refreshed successfully", { accessToken: newAccessToken, refreshToken: newRefreshToken }));
   } 
   
   catch (error) {
     next(error); 
   }})    
    
+ const changePassword = asynchandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
 
- const changePassword = asynchandler(async (req, res) => {                              // this function changes the user's password after verifying the old password
-    const { oldpassword, newpassword, confirmpassword } = req.body;
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(400, "Both old and new passwords are required");
+  }
 
-    if (!oldpassword || !newpassword || !confirmpassword) {
-        throw new ApiError(400, "All password fields are required");
-    }
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
 
-    if (newpassword !== confirmpassword) {
-        throw new ApiError(400, "New password and confirm password do not match");
-    }
+  if (!user.password) {
+    throw new ApiError(400, "No password set for this account");
+  }
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-        throw new ApiError(404, "User not found");
-    }
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) {
+    throw new ApiError(400, "Invalid old password");
+  }
 
-    const isMatch = await user.isPasswordmatch(oldpassword);
-    if (!isMatch) {
-        throw new ApiError(401, "Old password is incorrect");
-    }
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
 
-    user.password = newpassword;
-    await user.save({ validateBeforeSave: true });
-
-    return res.status(200).json(
-        new ApiResponse(200, {}, "Password changed successfully")
-    );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password changed successfully", {}));
 });
 
 const getcurrentuser = asynchandler(async (req, res) => {                                   // this function returns the current user details
@@ -225,7 +228,7 @@ const getcurrentuser = asynchandler(async (req, res) => {                       
     if (!user) {
         throw new ApiError(404, "User not found");
     }
-    return res.status(200).json(new ApiResponse(200, user, "Current user details fetched successfully"));
+    return res.status(200).json(new ApiResponse(200,"Current user details fetched successfully",user));
 }); 
 
 const forgetPassword = asynchandler(async (req, res) => {                                          // this function handles the password reset request by generating a reset token and sending it to the user's email
@@ -282,12 +285,11 @@ const forgetPassword = asynchandler(async (req, res) => {                       
     }
 });
 
-
-const updateUserDetails = asynchandler(async (req, res) => {                                  // this function updates the user's username and email
+const updateUserDetails = asynchandler(async (req, res) => {
     const { username, email } = req.body;
 
-    if (!username || !email) {
-        throw new ApiError(400, "Username and email are required");
+    if (!username && !email) {
+        throw new ApiError(400, "At least one of username or email is required");
     }
 
     const user = await User.findById(req.user._id);
@@ -295,10 +297,15 @@ const updateUserDetails = asynchandler(async (req, res) => {                    
         throw new ApiError(404, "User not found");
     }
 
-    user.username = username.toLowerCase();
-    user.email = email.toLowerCase();
+    if (typeof username === "string") {
+        user.username = username.toLowerCase();
+    }
 
-    await user.save(); 
+    if (typeof email === "string") {
+        user.email = email.toLowerCase();
+    }
+
+    await user.save();
 
     res.status(200).json({
         message: "User details updated successfully",
@@ -343,7 +350,7 @@ const updateimages = asynchandler(async (req, res) => {                         
     }
 
     await user.save();
-    return res.status(200).json(new ApiResponse(200, user, "User image(s) updated successfully"));
+    return res.status(200).json(new ApiResponse(200,"User image(s) updated successfully",user));
 });
 
 
@@ -380,7 +387,7 @@ const UserProfile = asynchandler(async (req, res) => {                          
                 subscribedToCount: { $size: "$SubscribedTo" },
                 isSubscribed: {
                     $in: [
-                        mongoose.Types.ObjectId(req.user?._id),
+                        new mongoose.Types.ObjectId(req.user?._id),
                         {
                             $map: {
                                 input: "$Subscribers",
@@ -412,8 +419,7 @@ const UserProfile = asynchandler(async (req, res) => {                          
     }
 
 
-
-    res.status(200).json(new ApiResponse(200, channel[0], "User profile fetched successfully"));
+    res.status(200).json(new ApiResponse(200,"User profile fetched successfully",channel[0]));
 });
 
 const Watchhistory = asynchandler(async (req, res) => {
@@ -469,10 +475,9 @@ const Watchhistory = asynchandler(async (req, res) => {
         }
     ]);
 
-   res.status(200).json(new ApiResponse(200, history[0]?.watchHistoryVideos || [], "Watch history fetched successfully"));
+   res.status(200).json(new ApiResponse(200,"Watch history fetched successfully",history[0]?.watchHistoryVideos || []));
 });
  
-
 
 export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,forgetPassword, getcurrentuser,updateUserDetails, updateimages,UserProfile,Watchhistory };
 

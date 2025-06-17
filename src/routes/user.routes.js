@@ -22,7 +22,7 @@ userRouter.post('/refresh', refreshAccessToken);
 
 userRouter.post('/change-password', verifyJWT, changePassword);
 
-userRouter.post('/resetpassword', forgetPassword);
+userRouter.post('/resetpassword', forgetPassword);               // remianing testing from real account
 
 userRouter.get('/current', verifyJWT, getcurrentuser);
 
@@ -32,7 +32,7 @@ userRouter.patch('/profile-pictures', verifyJWT, upload.fields([{ name: 'avatar'
 
 userRouter.get('/profile/:username', verifyJWT,UserProfile);
 
-userRouter.get('/watch-history', verifyJWT, Watchhistory);
+userRouter.get('/watch-history', verifyJWT, Watchhistory);       // remaining testing
 
 
 export default userRouter;

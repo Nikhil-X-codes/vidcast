@@ -4,32 +4,45 @@ import { Video } from "../models/Video.model.js";
 import {Comments} from "../models/Comments.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
+import mongoose from "mongoose";
 
 
 const likeVideo = asynchandler(async (req, res, next) => {
     const { videoId } = req.params;
     const userId = req.user._id;
 
-    const video=await Video.findById(videoId);
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid video ID format");
+    }
 
-    if(!video){
+    const video = await Video.findById(videoId);
+    if (!video) {
         throw new ApiError(404, "Video not found");
     }
 
-    const existingLike = await Likes.findOne(userId);
+    const existingLike = await Likes.findOneAndDelete({ 
+        likedby: userId,
+        video: videoId
+    });
+
     if (existingLike) {
-        return res.status(200).json(new ApiResponse("Video already liked", existingLike));
+        return res.status(200).json(
+            new ApiResponse("Like removed (disliked)", existingLike)
+        );
     }
 
     const like = await Likes.create({
-        userId,
-        videoId
+        likedby: userId,
+        video: videoId
     });
-    res.status(201).json(new ApiResponse("Video liked successfully", like));
- 
-})
 
-const likecomment = asynchandler(async (req, res, next) => {
+    return res.status(201).json(
+        new ApiResponse("Video liked successfully", like)
+    );
+});
+
+
+const likecomment = asynchandler(async (req, res, next) => {         
   
     const { commentId } = req.params;
     const userId = req.user._id;
@@ -51,6 +64,7 @@ const likecomment = asynchandler(async (req, res, next) => {
 
     res.status(201).json(new ApiResponse("Comment liked successfully", like));
 })
+
 
 const getLikedVideos = asynchandler(async (req, res) => {
   const userId = req.user._id;
@@ -86,11 +100,9 @@ const getLikedVideos = asynchandler(async (req, res) => {
 
   const likedVideos = await Likes.aggregatePaginate(aggregate, options);
 
-  res.render("playlist", {
-    videos: likedVideos.docs,
-    currentPage: likedVideos.page,
-    totalPages: likedVideos.totalPages,
-  });
+ res.status(200).json(
+    new ApiResponse("Liked videos retrieved successfully", likedVideos)
+  );
 });
 
 

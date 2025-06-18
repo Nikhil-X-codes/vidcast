@@ -14,7 +14,7 @@ const createPlaylist = asynchandler(async (req, res) => {
     const playlist = await Playlists.create({
         name,
         description,
-        user: userId,
+        owner: userId,
     });
 
     res.status(201).json(new ApiResponse(playlist, "Playlist created successfully"));
@@ -24,7 +24,7 @@ const deletePlaylist = asynchandler(async (req, res) => {
     const { playlistId } = req.params;
     const userId = req.user.id;
 
-    const playlist = await Playlists.findOneAndDelete({ _id: playlistId, user: userId });
+    const playlist = await Playlists.findOneAndDelete({ _id: playlistId, owner: userId });
 
     if (!playlist) {
         throw new ApiError(404, "Playlist not found");
@@ -39,11 +39,11 @@ const updatePlaylist = asynchandler(async (req, res) => {
     const { name, description } = req.body;
     const userId = req.user.id;
 
-    if (!name || !description) {
+    if (!name && !description) {
         throw new ApiError(400, "Name and description are required");
     }
 
-    const playlist = await Playlists.findOne({ _id: playlistId, user: userId });
+    const playlist = await Playlists.findOne({ _id: playlistId, owner: userId });
 
     if (!playlist) {
         throw new ApiError(404, "Playlist not found");
@@ -61,7 +61,7 @@ const addVideoToPlaylist = asynchandler(async (req, res) => {
     const { playlistId, videoId } = req.params;
     const userId = req.user.id;
 
-    const playlist = await Playlists.findOne({ _id: playlistId, user: userId });
+    const playlist = await Playlists.findOne({ _id: playlistId, owner: userId });
 
     if (!playlist) {
         throw new ApiError(404, "Playlist not found");
@@ -81,21 +81,37 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
     const { playlistId, videoId } = req.params;
     const userId = req.user.id;
 
-    const playlist = await Playlists.findOne({ _id: playlistId, user: userId });
+    const playlist = await Playlists.findOne({ 
+        _id: playlistId,
+        owner: userId 
+    });
 
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new ApiError(404, "Playlist not found or you don't have permission");
     }
 
     if (!playlist.videos.includes(videoId)) {
         throw new ApiError(400, "Video does not exist in the playlist");
     }
 
-    playlist.videos = playlist.videos.filter(video => video !== videoId);
-    await playlist.save();
+    playlist.videos = playlist.videos.filter(video => video.toString() !== videoId);
+    await playlist.save(); 
 
     res.status(200).json(new ApiResponse(playlist, "Video removed from playlist successfully"));
-})
+});
+
+const getplaylist=asynchandler(async (req, res) => {
+    const { playlistId } = req.params;
+    const userId = req.user.id;
+
+    const playlist = await Playlists.findOne({ _id: playlistId, owner: userId }).populate('videos');
+
+    if (!playlist) {
+        throw new ApiError(404, "Playlist not found");
+    }
+
+    res.status(200).json(new ApiResponse(playlist, "Playlist retrieved successfully"));
+});
 
 
-export { createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist };
+export { createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist, getplaylist };

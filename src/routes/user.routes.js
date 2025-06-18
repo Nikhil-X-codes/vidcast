@@ -22,17 +22,17 @@ userRouter.post('/refresh', refreshAccessToken);
 
 userRouter.post('/change-password', verifyJWT, changePassword);
 
-userRouter.post('/resetpassword', forgetPassword);               // remianing testing from real account
-
+userRouter.post('/resetpassword', forgetPassword);                                      
+ 
 userRouter.get('/current', verifyJWT, getcurrentuser);
-
-userRouter.patch('/update', verifyJWT, updateUserDetails);
+ 
+userRouter.patch('/update', verifyJWT, updateUserDetails);                                         
 
 userRouter.patch('/profile-pictures', verifyJWT, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'coverimage', maxCount: 1 }]), updateimages);
 
 userRouter.get('/profile/:username', verifyJWT,UserProfile);
 
-userRouter.get('/watch-history', verifyJWT, Watchhistory);      // remianing real testing 
+userRouter.get('/watch-history', verifyJWT, Watchhistory);                      
 
 
 export default userRouter;

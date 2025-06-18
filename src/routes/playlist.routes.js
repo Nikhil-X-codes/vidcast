@@ -1,4 +1,4 @@
- import {createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist} from '../Controllers/Playlist.controller.js';
+ import {createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist,getplaylist } from '../Controllers/Playlist.controller.js';
 import  Router  from 'express';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -9,5 +9,6 @@ playlistRouter.delete('/:playlistId', verifyJWT, deletePlaylist);
 playlistRouter.put('/:playlistId', verifyJWT, updatePlaylist);
 playlistRouter.post('/:playlistId/videos/:videoId', verifyJWT, addVideoToPlaylist);
 playlistRouter.delete('/:playlistId/videos/:videoId', verifyJWT, removeVideoFromPlaylist);
+playlistRouter.get('/:playlistId', verifyJWT, getplaylist);
 
 export default playlistRouter;

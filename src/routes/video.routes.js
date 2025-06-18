@@ -16,7 +16,7 @@ videoRouter.delete("/delete/:videoId", verifyJWT,videodeleting);
 
 videoRouter.patch("/update/:videoId", verifyJWT,videoupdating);    
 
-videoRouter.get("/all",verifyJWT,getAllVideos);                                                // remaining testing
+videoRouter.get("/all",verifyJWT,getAllVideos);                                               
 videoRouter.get("/single/:videoId",verifyJWT,getSingleVideo);
 
 export default videoRouter;

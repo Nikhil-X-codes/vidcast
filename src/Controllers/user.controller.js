@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utils/Sendmail.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import crypto from 'crypto';
 
 
 const registeruser = asynchandler(async (req, res) => {
@@ -59,7 +60,7 @@ const registeruser = asynchandler(async (req, res) => {
 });
 
 
-const loginuser = asynchandler(async (req, res) => {                                    // generate access and refresh tokens when user logs in
+const loginuser = asynchandler(async (req, res) => {                                   
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -107,7 +108,7 @@ const loginuser = asynchandler(async (req, res) => {                            
 
 
 
-const logoutuser = asynchandler(async (req, res) => {                    // this function logs out the user by clearing the refresh token from the database and clearing cookies
+const logoutuser = asynchandler(async (req, res) => {                     
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -148,7 +149,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     }
 };
 
-const refreshAccessToken = asynchandler(async (req, res, next) => {          // this function refreshes the access token using the refresh token stored in cookies 
+const refreshAccessToken = asynchandler(async (req, res, next) => {          
   try {
     const refreshTokenFromCookie = req.cookies.refreshToken;
 
@@ -223,7 +224,7 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {          // 
     .json(new ApiResponse(200, "Password changed successfully", {}));
 });
 
-const getcurrentuser = asynchandler(async (req, res) => {                                   // this function returns the current user details
+const getcurrentuser = asynchandler(async (req, res) => {                                   
     const user = await User.findById(req.user._id).select("-password -refreshToken");
     if (!user) {
         throw new ApiError(404, "User not found");
@@ -231,7 +232,7 @@ const getcurrentuser = asynchandler(async (req, res) => {                       
     return res.status(200).json(new ApiResponse(200,"Current user details fetched successfully",user));
 }); 
 
-const forgetPassword = asynchandler(async (req, res) => {                                          // this function handles the password reset request by generating a reset token and sending it to the user's email
+const forgetPassword = asynchandler(async (req, res) => {                                         
     const { email } = req.body;
 
     if (!email) {
@@ -356,7 +357,7 @@ const updateimages = asynchandler(async (req, res) => {
 });
 
 
-const UserProfile = asynchandler(async (req, res) => {                                 // this function fetches the user profile by username and includes subscriber count, subscribed to count, and subscription status
+const UserProfile = asynchandler(async (req, res) => {                                
     const { username } = req.params;
 
     if (!username?.trim()) {

@@ -17,7 +17,6 @@ const PlaylistsSchema = new Schema({
  },
  description:{
     type: String,
-    default: "",
  }
 
 }, { timestamps: true });

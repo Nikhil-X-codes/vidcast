@@ -166,7 +166,67 @@ Returns a list of videos based on query parameters.
 Fetches a video’s complete details using its `videoId`.
 
 
-## 🧩 Developer Note
+## ❤️ Like Functionality
+
+- **Like a video**  
+  Allows a user to like a specific video.
+
+- **Like a comment**  
+  Allows a user to like a specific comment.
+
+- **Get all liked videos**  
+  Retrieves all videos liked by the current user.
+
+---
+
+## 💬 Comment Functionality
+
+- **Add comment**  
+  Adds a comment to a specified video.
+
+- **Delete comment**  
+  Deletes a comment made by the user.
+
+- **Edit comment**  
+  Updates the content of an existing comment.
+
+---
+
+## 📂 Playlist Functionality
+
+- **Add playlist**  
+  Creates a new playlist for organizing videos.
+
+- **Remove playlist**  
+  Deletes an existing playlist created by the user.
+
+- **Update playlist**  
+  Modifies the name or metadata of a playlist.
+
+- **Add video to playlist**  
+  Adds a video to a selected playlist.
+
+- **Remove video from playlist**  
+  Removes a video from a selected playlist.
+
+- **Get a playlist**  
+  Fetches all videos and details of a given playlist.
+
+---
+
+## 🔔 Subscription Functionality
+
+- **Toggle the subscribe button**  
+  Subscribes the user to a channel if not already subscribed, or unsubscribes if already subscribed.
+
+- **Get number of channels subscribed by current user**  
+  Returns the total number of channels the current user is subscribed to.
+
+- **Get number of subscribers of a channel**  
+  Returns the total number of subscribers for a specific channel.
+
+
+## 🧩 Developer Notelist
 
 In production-grade systems:
 - Controller logic is often separated into **service layers**.

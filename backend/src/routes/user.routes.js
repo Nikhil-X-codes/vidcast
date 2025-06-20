@@ -21,9 +21,7 @@ userRouter.post('/logout',verifyJWT,logoutuser);
 userRouter.post('/refresh', refreshAccessToken);
 
 userRouter.post('/change-password', verifyJWT, changePassword);
-
-userRouter.post('/resetpassword', forgetPassword);                                      
- 
+                              
 userRouter.get('/current', verifyJWT, getcurrentuser);
  
 userRouter.patch('/update', verifyJWT, updateUserDetails);                                         

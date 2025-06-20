@@ -94,14 +94,7 @@ Fetches user data based on their MongoDB `_id`.
 
 ---
 
-## 7. 🆘 Forgot Password
-
-**Description**:  
-Sends a password reset link to the user’s registered email address.
-
----
-
-## 8. ✏️ Update User Info and Images
+## 7. ✏️ Update User Info and Images
 
 **Description**:  
 Users can update the following fields:

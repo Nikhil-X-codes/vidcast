@@ -25,7 +25,7 @@ VidCast is a dynamic video streaming platform similar to YouTube. Users can regi
 | `jsonwebtoken`  | JWT-based user authentication         |
 | `mongoose`      | ODM for MongoDB                       |
 | `multer`        | Middleware for file uploads           |
-| `nodemailer`    | Sends emails                          |
+                        |
 
 ### 🔧 **devDependencies (For development only)**
 | Package     | Description                            |
@@ -66,7 +66,7 @@ VidCast/
 
 ```
 # Step 1: Clone the repository
-git clone 
+git clone https://github.com/Nikhil-X-codes/vidcast.git
 
 # Step 2: Backend setup
 cd vidcast/server

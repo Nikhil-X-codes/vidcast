@@ -107,7 +107,6 @@ const loginuser = asynchandler(async (req, res) => {
 });
 
 
-
 const logoutuser = asynchandler(async (req, res) => {                     
     await User.findByIdAndUpdate(
         req.user._id,
@@ -224,6 +223,7 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {
     .json(new ApiResponse(200, "Password changed successfully", {}));
 });
 
+
 const getcurrentuser = asynchandler(async (req, res) => {                                   
     const user = await User.findById(req.user._id).select("-password -refreshToken");
     if (!user) {
@@ -232,59 +232,6 @@ const getcurrentuser = asynchandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200,"Current user details fetched successfully",user));
 }); 
 
-const forgetPassword = asynchandler(async (req, res) => {                                         
-    const { email } = req.body;
-
-    if (!email) {
-        res.status(400);
-        throw new Error("Please provide an email");
-    }
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-        res.status(404);
-        throw new Error("User not found");
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-
-    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; 
-
-    await user.save();
-
-   const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetpassword/${resetToken}`;
-
-    const message = `
-        <h2>Password Reset Request</h2>
-        <p>If you requested a password reset, click the link below:</p>
-        <a href="${resetUrl}" target="_blank">${resetUrl}</a>
-        <p>This link will expire in 10 minutes.</p>
-    `;
-
-    try {
-        await sendEmail({
-            to: user.email,
-            subject: "Password Reset",
-            html: message
-        });
-
-        res.status(200).json({
-            success: true,
-            message: "Password reset link sent to email"
-        });
-    } catch (error) {
-
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save();
-
-        res.status(500);
-        throw new Error("Email could not be sent. Try again later.");
-    }
-});
 
 const updateUserDetails = asynchandler(async (req, res) => {
     const { username, email } = req.body;
@@ -482,7 +429,7 @@ const Watchhistory = asynchandler(async (req, res) => {
 });
  
 
-export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,forgetPassword, getcurrentuser,updateUserDetails, updateimages,UserProfile,Watchhistory };
+export { registeruser, loginuser, logoutuser,refreshAccessToken, changePassword,getcurrentuser,updateUserDetails, updateimages,UserProfile,Watchhistory };
 
 
 

@@ -1,5 +1,4 @@
-# 🎥 VidCast
-
+# 🎥 VidCast                                                                 (I'm not working on its Frontend)
 VidCast is a dynamic video streaming platform similar to YouTube. Users can register, log in, search videos, manage personal playlists, view history, and subscribe to their favorite creators.
 
 ---

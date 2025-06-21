@@ -117,5 +117,19 @@ const getSingleVideo = asynchandler(async (req, res) => {
     res.status(200).json(new ApiResponse("Video fetched successfully", video));
 })
 
+const viewonvideo = asynchandler(async (req, res) => {
+    const {videoId} = req.params;
+    const video = await Video.findById(videoId);
+    if (!video) {
+        throw new ApiError(404, "Video not found");
+    }
 
-export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo};
+    video.views += 1;
+    await video.save();
+
+    res.status(200).json(new ApiResponse("Video viewed successfully", video));
+}
+);
+
+
+export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo,viewonvideo};

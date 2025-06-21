@@ -4,10 +4,8 @@ import {uploadoncloudinary} from "../utils/Cloudinary.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
 import jwt from "jsonwebtoken";
-import sendEmail from "../utils/Sendmail.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import crypto from 'crypto';
 
 
 const registeruser = asynchandler(async (req, res) => {

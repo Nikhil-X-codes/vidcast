@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo} from "../Controllers/video.controller.js";
+import {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo,viewonvideo} from "../Controllers/video.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -18,5 +18,8 @@ videoRouter.patch("/update/:videoId", verifyJWT,videoupdating);
 
 videoRouter.get("/all",verifyJWT,getAllVideos);                                               
 videoRouter.get("/single/:videoId",verifyJWT,getSingleVideo);
+
+videoRouter.get("/view/:videoId",verifyJWT,viewonvideo);
+
 
 export default videoRouter;

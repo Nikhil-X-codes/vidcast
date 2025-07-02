@@ -24,7 +24,7 @@ VidCast is a dynamic video streaming platform similar to YouTube. Users can regi
 | `jsonwebtoken`  | JWT-based user authentication         |
 | `mongoose`      | ODM for MongoDB                       |
 | `multer`        | Middleware for file uploads           |
-                        |
+                  
 
 ### 🔧 **devDependencies (For development only)**
 | Package     | Description                            |
@@ -43,7 +43,6 @@ VidCast is a dynamic video streaming platform similar to YouTube. Users can regi
 - ✅ RESTful APIs  
 - ✅ Error Handling  
 - ✅ Form Validation  
-- ✅ Responsive UI  
 - ✅ MongoDB ODM via Mongoose  
 
 ---

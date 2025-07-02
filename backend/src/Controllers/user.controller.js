@@ -192,11 +192,11 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {
     next(error); 
   }})    
    
- const changePassword = asynchandler(async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
+const changePassword = asynchandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body; 
 
-  if (!oldPassword || !newPassword) {
-    throw new ApiError(400, "Both old and new passwords are required");
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "Both current and new passwords are required");
   }
 
   const user = await User.findById(req.user?._id);
@@ -208,9 +208,9 @@ const refreshAccessToken = asynchandler(async (req, res, next) => {
     throw new ApiError(400, "No password set for this account");
   }
 
-  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
   if (!isMatch) {
-    throw new ApiError(400, "Invalid old password");
+    throw new ApiError(400, "Invalid current password");
   }
 
   user.password = newPassword;
@@ -275,7 +275,7 @@ const updateimages = asynchandler(async (req, res) => {
 
 
     if (avatarFile) {
-        const avatarUrl = await uploadOnCloudinary(avatarFile.path);
+        const avatarUrl = await uploadoncloudinary(avatarFile.path);
         if (!avatarUrl) {
             throw new ApiError(500, "Failed to upload avatar to cloud storage");
         }
@@ -283,7 +283,7 @@ const updateimages = asynchandler(async (req, res) => {
     }
 
     if (coverImageFile) {
-        const coverImageUrl = await uploadOnCloudinary(coverImageFile.path);
+        const coverImageUrl = await uploadoncloudinary(coverImageFile.path);
         if (!coverImageUrl) {
             throw new ApiError(500, "Failed to upload cover image to cloud storage");
         }
@@ -410,7 +410,8 @@ const Watchhistory = asynchandler(async (req, res) => {
                             thumbnail: 1,
                             views: 1,
                             duration: 1,
-                            owner: "$ownerDetails"
+                            owner: "$ownerDetails",
+                            video:1
                         }
                     }
                 ]

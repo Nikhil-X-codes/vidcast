@@ -3,6 +3,7 @@ import { Video } from "../models/Video.model.js";
 import {uploadoncloudinary} from "../utils/Cloudinary.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
+import { User } from "../models/User.model.js";
 
 
 const videouploading = asynchandler(async (req, res) => {
@@ -117,19 +118,30 @@ const getSingleVideo = asynchandler(async (req, res) => {
     res.status(200).json(new ApiResponse("Video fetched successfully", video));
 })
 
+
 const viewonvideo = asynchandler(async (req, res) => {
-    const {videoId} = req.params;
-    const video = await Video.findById(videoId);
-    if (!video) {
-        throw new ApiError(404, "Video not found");
-    }
+  const { videoId } = req.params;
 
-    video.views += 1;
-    await video.save();
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
 
-    res.status(200).json(new ApiResponse("Video viewed successfully", video));
-}
-);
+  video.views += 1;
+  await video.save();
+
+  const user = await User.findById(req.user._id);
+
+  if (!user.watchhistory.includes(video._id)) {
+    user.watchhistory.push(video._id);
+    await user.save();
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Video viewed and added to watch history", video));
+});
+
 
 
 export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo,viewonvideo};

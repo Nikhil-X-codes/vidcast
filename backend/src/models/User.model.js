@@ -14,14 +14,13 @@ const userSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
-    index: true
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true
   },
   fullname: {
     type: String,
@@ -47,7 +46,13 @@ const userSchema = new Schema({
 },
 resetPasswordExpire: {
   type: Date
-}
+},
+watchHistory: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Video"
+            }
+        ],
 }, { timestamps: true });
 
 

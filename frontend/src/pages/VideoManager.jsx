@@ -66,9 +66,9 @@ const VideoManager = () => {
     }
   };
 
-  const handleUpdate = async (id, title, desc) => {
+  const handleUpdate = async (id, title, description) => {
     try {
-      await updateVideo(id, title, desc);
+      await updateVideo(id, title, description);
       await loadVideos();
     } catch (err) {
       console.error('Update failed:', err);
@@ -96,7 +96,7 @@ const VideoManager = () => {
             type="text"
             placeholder="Title"
             value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            onChange={(e) => setForm({ ...form, title: e.target.value})}
             className="w-full mt-1 p-2 border rounded"
             required
           />

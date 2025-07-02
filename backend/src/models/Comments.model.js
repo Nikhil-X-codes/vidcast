@@ -17,6 +17,10 @@ const CommentSchema = new Schema({
     ref: "User",
     required: true,
    },
+   commentcount:{
+      type: Number,
+      default: 0,
+   }
 
 }, { timestamps: true });
 

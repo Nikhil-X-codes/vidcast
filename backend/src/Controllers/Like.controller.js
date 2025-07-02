@@ -7,7 +7,7 @@ import ApiResponse from "../utils/apiresponse.js";
 import mongoose from "mongoose";
 
 
-const likeVideo = asynchandler(async (req, res, next) => {
+const likeVideo = asynchandler(async (req, res) => {
     const { videoId } = req.params;
     const userId = req.user._id;
 
@@ -20,29 +20,41 @@ const likeVideo = asynchandler(async (req, res, next) => {
         throw new ApiError(404, "Video not found");
     }
 
-    const existingLike = await Likes.findOneAndDelete({ 
-        likedby: userId,
-        video: videoId
-    });
+    const existingLike = await Likes.findOne({ likedby: userId, video: videoId });
 
     if (existingLike) {
+
+        await Likes.findByIdAndDelete(existingLike._id);
+
+        const newCount = await Likes.countDocuments({ video: videoId });
+        await Video.findByIdAndUpdate(videoId, { likecount: newCount });
+
         return res.status(200).json(
-            new ApiResponse("Like removed (disliked)", existingLike)
+            new ApiResponse("Like removed (disliked)", {
+              likecount: newCount,
+            })
         );
     }
 
-    const like = await Likes.create({
+    await Likes.create({
         likedby: userId,
         video: videoId
     });
 
+    const newCount = await Likes.countDocuments({ video: videoId });
+    await Video.findByIdAndUpdate(videoId, { likecount: newCount });
+
     return res.status(201).json(
-        new ApiResponse("Video liked successfully", like)
+        new ApiResponse("Video liked successfully",{
+          video:videoId,
+          likedby: userId,  
+          likecount: newCount
+        })
     );
 });
 
 
-const likecomment = asynchandler(async (req, res, next) => {         
+const likecomment = asynchandler(async (req, res) => {         
   
     const { commentId } = req.params;
     const userId = req.user._id;
@@ -54,7 +66,16 @@ const likecomment = asynchandler(async (req, res, next) => {
 
     const existingLike = await Likes.findOne({ comment: commentId, likedby: userId });
     if (existingLike) {
-        return res.status(200).json(new ApiResponse("Comment already liked", existingLike));
+        await Likes.findByIdAndDelete(existingLike._id);
+
+        const newCount = await Likes.countDocuments({ comment: commentId });
+        await Comments.findByIdAndUpdate(commentId, { likecount: newCount });
+
+           return res.status(200).json(
+            new ApiResponse("Like on comment removed (disliked)", {
+              likecount: newCount,
+            })
+        );
     }
 
     const like = await Likes.create({
@@ -62,9 +83,17 @@ const likecomment = asynchandler(async (req, res, next) => {
         likedby: userId
     });
 
-    res.status(201).json(new ApiResponse("Comment liked successfully", like));
-})
+    const newCount = await Likes.countDocuments({ comment: commentId });
+    await Comments.findByIdAndUpdate(commentId, { likecount: newCount });
 
+      return res.status(200).json(
+            new ApiResponse("Like on comment", {
+              likecount: newCount,
+              commentId: commentId,
+              likedby: userId,
+            })
+        );
+})
 
 const getLikedVideos = asynchandler(async (req, res) => {
   const userId = req.user._id;

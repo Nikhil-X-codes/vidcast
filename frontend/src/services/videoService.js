@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000/api/v1'; // Change if your backend host/port is different
+const API_BASE = 'http://localhost:5000/api/v1'; 
 
 export const fetchVideos = (limit = 10) =>
   axios.get(`${API_BASE}/videos/all?limit=${limit}`, {

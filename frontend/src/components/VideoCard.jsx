@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   likeVideo,
-  likeComment,
   getLikedVideos,
   addComment,
   updateComment,
   deleteComment,
-  getLikeStatus
+  getLikeStatus,
+  getComments
 } from '../services/addService';
 import Time from './Time';
-
 
 const VideoCard = ({
   video,
@@ -27,71 +26,63 @@ const VideoCard = ({
   const [viewed, setViewed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const [likeCount, setLikeCount] = useState(video.likes || 0);
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
 
-  // Load comments when component mounts or showComments changes
-  useEffect(() => {
-    if (showComments) {
-      fetchComments();
-    }
-  }, [showComments]);
-
-
-  const fetchComments = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/v1/comments/video/${video._id}`);
-      setComments(response.data.comments || []);
-    } catch (error) {
-      console.error("Failed to fetch comments:", error);
-    }
-  };
-
-useEffect(() => {
+ useEffect(() => {
   const fetchStatus = async () => {
-    const result = await getLikeStatus(video._id);
-    if (result.success) {
-      setLiked(result.data.liked);
-    } else {
-      console.error(result.message);
+    try {
+      const result = await getLikeStatus(video._id);
+      if (result.success) {
+        setLiked(result.data.liked);
+        setLikeCount(result.data.likecount || 0);
+      } else {
+        console.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error fetching like status:", error);
     }
   };
 
   fetchStatus();
 }, [video._id]);
 
-
-const handleLike = async () => {
-  try {
-    const response = await likeVideo(video._id); 
-
-    if (response.success) {
-      setLiked(response.data.liked); 
-      setLikeCount(response.data.likecount);
-    } else {
-      console.error("Like operation was not successful:", response);
-    }
-  } catch (error) {
-    console.error("Like operation failed:", error);
-  }
-};
-
-  const handleCommentLike = async (commentId) => {
+useEffect(() => {
+  const fetchComments = async () => {
     try {
-      const response = await likeComment(commentId);
-      setComments(prev => 
-        prev.map(comment => 
-          comment._id === commentId 
-            ? { ...comment, isLiked: response.isLiked, likesCount: response.likesCount } 
-            : comment
-        )
-      );
+      const result = await getComments(video._id);
+      if (result.success) {
+        setComments(result.data); 
+      } else {
+        console.error("Error:", result.message);
+      }
     } catch (error) {
-      console.error("Failed to like comment:", error);
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  if (showComments) {
+    fetchComments();
+  }
+}, [showComments, video._id]); 
+
+
+  const handleLike = async () => {
+    try {
+      const response = await likeVideo(video._id); 
+
+      if (response.success) {
+        setLiked(response.data.liked); 
+        setLikeCount(response.data.likecount || 0);
+      } else {
+        console.error("Like operation was not successful:", response);
+      }
+    } catch (error) {
+      console.error("Like operation failed:", error);
     }
   };
 
@@ -100,9 +91,11 @@ const handleLike = async () => {
     if (!commentText.trim()) return;
 
     try {
-      const newComment = await addComment(video._id, commentText);
-      setComments(prev => [newComment, ...prev]);
-      setCommentText('');
+      const response = await addComment(video._id, commentText);
+      if (response.success) {
+        setComments(prev => [response.data, ...prev]);
+        setCommentText('');
+      }
     } catch (error) {
       console.error("Failed to add comment:", error);
     }
@@ -112,14 +105,16 @@ const handleLike = async () => {
     if (!editCommentText.trim()) return;
 
     try {
-      const updatedComment = await updateComment(commentId, editCommentText);
-      setComments(prev => 
-        prev.map(comment => 
-          comment._id === commentId ? updatedComment : comment
-        )
-      );
-      setEditingCommentId(null);
-      setEditCommentText('');
+      const response = await updateComment(commentId, editCommentText);
+      if (response.success) {
+        setComments(prev => 
+          prev.map(comment => 
+            comment._id === commentId ? response.data : comment
+          )
+        );
+        setEditingCommentId(null);
+        setEditCommentText('');
+      }
     } catch (error) {
       console.error("Failed to update comment:", error);
     }
@@ -127,8 +122,10 @@ const handleLike = async () => {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      await deleteComment(commentId);
-      setComments(prev => prev.filter(comment => comment._id !== commentId));
+      const response = await deleteComment(commentId);
+      if (response.success) {
+        setComments(prev => prev.filter(comment => comment._id !== commentId));
+      }
     } catch (error) {
       console.error("Failed to delete comment:", error);
     }
@@ -136,7 +133,7 @@ const handleLike = async () => {
 
   const startEditingComment = (comment) => {
     setEditingCommentId(comment._id);
-    setEditCommentText(comment.text);
+    setEditCommentText(comment.content);
   };
 
   const cancelEditingComment = () => {
@@ -149,32 +146,6 @@ const handleLike = async () => {
     setIsEditing(false);
   };
 
-  // Add this to your comment rendering section
-  const renderCommentActions = (comment) => (
-    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <button 
-        onClick={() => startEditingComment(comment)}
-        className="text-blue-600 hover:text-blue-800 text-xs"
-      >
-        Edit
-      </button>
-      <button 
-        onClick={() => handleDeleteComment(comment._id)}
-        className="text-red-600 hover:text-red-800 text-xs"
-      >
-        Delete
-      </button>
-      <button 
-        onClick={() => handleCommentLike(comment._id)}
-        className={`flex items-center space-x-1 ${comment.isLiked ? 'text-red-600' : 'text-gray-600'} text-xs`}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill={comment.isLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <span>{comment.likesCount}</span>
-      </button>
-    </div>
-  );
 
   return (
     <div 
@@ -263,24 +234,23 @@ const handleLike = async () => {
                 <h5 className="text-lg font-semibold text-gray-900 truncate">{video.description}</h5>
                 <p className="text-sm text-gray-600 mt-1">{video.channel?.name}</p>
                 <p className="text-xs text-gray-500 mt-1">
-  {video.views?.toLocaleString() || "678K"} views • <Time date={video.createdAt} />
+                  {video.views?.toLocaleString() || "678K"} views • <Time date={video.createdAt} />
                 </p>
               </>
             )}
           </div>
         </div>
 
-        {/* Like and Comment Buttons */}
         <div className="flex items-center justify-between mt-3 border-t pt-3">
-<button 
-  onClick={handleLike}
-  className={`flex items-center space-x-1 ${liked ? 'text-red-600' : 'text-gray-600'} hover:text-red-600`}
->
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-  <span>{Number(likeCount).toLocaleString()} Likes</span>
-</button>
+          <button 
+            onClick={handleLike}
+            className={`flex items-center space-x-1 ${liked ? 'text-red-600' : 'text-gray-600'} hover:text-red-600`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span>{Number(likeCount).toLocaleString()} Likes</span>
+          </button>
           
           <button 
             onClick={() => setShowComments(!showComments)}
@@ -314,74 +284,96 @@ const handleLike = async () => {
             </form>
             
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {comments.map(comment => (
-                <div key={comment._id} className="flex space-x-2 group">
-                  <img 
-                    src={comment.user?.avatar || 'https://via.placeholder.com/40'} 
-                    alt="user" 
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div className="flex-1">
-                    {editingCommentId === comment._id ? (
-                      <div className="mb-2">
-                        <input
-                          type="text"
-                          value={editCommentText}
-                          onChange={(e) => setEditCommentText(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
-                          required
-                        />
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleUpdateComment(comment._id)}
-                            className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
-                          >
-                            Save
-                          </button>
-                          <button 
-                            onClick={cancelEditingComment}
-                            className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-100 p-2 rounded-lg relative">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium text-sm">{comment.user?.username || 'Anonymous'}</p>
-                            <p className="text-sm">{comment.text}</p>
-                          </div>
-                          {comment.user?._id === localStorage.getItem('userId') && (
-                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                onClick={() => startEditingComment(comment)}
-                                className="text-blue-600 hover:text-blue-800 text-xs"
-                              >
-                                Edit
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteComment(comment._id)}
-                                className="text-red-600 hover:text-red-800 text-xs"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(comment.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    )}
+  {comments.map(comment => (
+    <div key={comment._id} className="flex space-x-2 group">
+      <img 
+        src={comment.CommentBy?.avatar || 'https://via.placeholder.com/40'} 
+        alt="user" 
+        className="w-8 h-8 rounded-full"
+      />
+      <div className="flex-1">
+        {editingCommentId === comment._id ? (
+          <div className="mb-2">
+            <input
+              type="text"
+              value={editCommentText}
+              onChange={(e) => setEditCommentText(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
+              required
+            />
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => handleUpdateComment(comment._id)}
+                className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
+              >
+                Save
+              </button>
+              <button 
+                onClick={cancelEditingComment}
+                className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-100 p-2 rounded-lg relative">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-medium text-sm">
+                  {comment.CommentBy?.username || 'Anonymous'}
+                </p>
+                <p className="text-sm">{comment.content}</p>
+              </div>
+              {comment.CommentBy?._id === localStorage.getItem('userId') && (
+                <div className="flex items-center space-x-2">
+                  <div className="relative group">
+                    <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg hidden group-hover:block z-10">
+                      <button
+                        onClick={() => startEditingComment(comment)}
+                        className="block w-full text-left px-4 py-2 text-xs text-blue-600 hover:bg-gray-100 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
+                  <button 
+                    onClick={() => handleCommentLike(comment._id)}
+                    className={`flex items-center space-x-1 ${comment.isLiked ? 'text-red-600' : 'text-gray-600'} hover:${comment.isLiked ? 'text-red-800' : 'text-gray-800'} text-xs`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" facility={comment.isLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span>{comment.likesCount || 0}</span>
+                  </button>
                 </div>
-              ))}
-              {comments.length === 0 && (
-                <p className="text-center text-gray-500 text-sm py-2">No comments yet</p>
               )}
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {new Date(comment.createdAt).toLocaleString()}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+  {comments.length === 0 && (
+    <p className="text-center text-gray-500 text-sm py-2">No comments yet</p>
+  )}
+</div>
+            
+
           </div>
         )}
 

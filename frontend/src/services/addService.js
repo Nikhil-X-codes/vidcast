@@ -14,10 +14,6 @@ export const likeVideo = async (videoId) => {
   }
 };
 
-export const likeComment = async (commentId) => {
-  const response = await axios.post(`${apiUrl}/likes/comment/${commentId}`);
-  return response.data;
-};
 
 export const getLikedVideos = async (page = 1, limit = 10) => {
   const response = await axios.get(`${apiUrl}/likes/videos`, {
@@ -27,17 +23,62 @@ export const getLikedVideos = async (page = 1, limit = 10) => {
 };
 
 export const addComment = async (videoId, commentText) => {
-  const response = await axios.post(`${apiUrl}/comments/add/${videoId}`, {
-    text: commentText
-  });
-  return response.data;
+  try {
+    const response = await axios.post(`${apiUrl}/comments/add/${videoId}`, {
+     commentText:commentText
+    },
+   );
+    return {
+      success: true,
+      status: response.status,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Failed to add comment",
+      error: error.message
+    };
+  }
 };
 
 export const updateComment = async (commentId, commentText) => {
-  const response = await axios.patch(`${apiUrl}/comments/update/${commentId}`, {
-    text: commentText
-  });
-  return response.data;
+  try {
+    const response = await axios.patch(`${apiUrl}/comments/update/${commentId}`, {
+      text: commentText
+    });
+    return {
+      success: true,
+      status: response.status,
+      data: response.data 
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Failed to update comment",
+      error: error.message
+    };
+  }
+};
+
+export const getComments = async (videoId) => {
+  try {
+    const response = await axios.get(`${apiUrl}/comments/${videoId}`);
+    return {
+      success: true,
+      status: response.status,
+      data: response.data.data || response.data // Handle different response structures
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Failed to fetch comments",
+      error: error.message
+    };
+  }
 };
 
 export const deleteComment = async (commentId) => {

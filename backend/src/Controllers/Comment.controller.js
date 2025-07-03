@@ -18,7 +18,7 @@ const addComment = asynchandler(async (req, res) => {
         content: commentText
     });
 
-    res.status(201).json(new ApiResponse("Comment added successfully", comment));
+    res.status(201).json(new ApiResponse(200,"Comment added successfully", comment));
 })
 
 const deleteComment = asynchandler(async (req, res) => {
@@ -31,7 +31,7 @@ const deleteComment = asynchandler(async (req, res) => {
 
     await Comments.deleteOne({ _id: commentId });
 
-    res.status(200).json(new ApiResponse("Comment deleted successfully"));
+    res.status(200).json(new ApiResponse(200,"Comment deleted successfully"));
 })
 
 const updatingComment = asynchandler(async (req, res) => {
@@ -50,8 +50,18 @@ const updatingComment = asynchandler(async (req, res) => {
     comment.content = commentText;
     await comment.save();
 
-    res.status(200).json(new ApiResponse("Comment updated successfully", comment));
+    res.status(200).json(new ApiResponse(200,"Comment updated successfully", comment));
 })
 
+const getComment = asynchandler(async (req, res) => {
+    const { videoId } = req.params; 
+    const comments = await Comments.find({ video: videoId })
+        .populate("CommentBy", "username avatar")
+        .sort({ createdAt: -1 });
+    if (!comments || comments.length === 0) {
+        throw new ApiError(404, "No comments found for this video");    
+    }
+    res.status(200).json(new ApiResponse(200,"Comments fetched successfully",comments));
+})
 
-export {addComment, deleteComment,updatingComment};
+export {addComment, deleteComment,updatingComment,getComment}

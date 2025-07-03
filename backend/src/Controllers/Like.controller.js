@@ -48,40 +48,6 @@ const likeVideo = asynchandler(async (req, res) => {
   );
 });
 
-const likecomment = asynchandler(async (req, res) => {         
-  
-    const { commentId } = req.params;
-    const userId = req.user._id;
-
-    const comment = await Comments.findById(commentId);
-    if (!comment) {
-        throw new ApiError(404, "Comment not found");
-    }
-
-    const existingLike = await Likes.findOne({ comment: commentId, likedby: userId });
-    if (existingLike) {
-        await Likes.findByIdAndDelete(existingLike._id);
-
-        const newCount = await Likes.countDocuments({ comment: commentId });
-        await Comments.findByIdAndUpdate(commentId, { likecount: newCount });
-
-           return res.status(200).json(
-            new ApiResponse("Like on comment removed (disliked)", {
-              likecount: newCount,
-            })
-        );
-    }
-
-    const like = await Likes.create({
-        comment: commentId,
-        likedby: userId
-    });
-
-    const newCount = await Likes.countDocuments({ comment: commentId });
-    await Comments.findByIdAndUpdate(commentId, { likecount: newCount });
-    
-})
-
 
 const getLikedVideos = asynchandler(async (req, res) => {
   const userId = req.user._id;
@@ -118,7 +84,7 @@ const getLikedVideos = asynchandler(async (req, res) => {
   const likedVideos = await Likes.aggregatePaginate(aggregate, options);
 
  res.status(200).json(
-    new ApiResponse("Liked videos retrieved successfully", likedVideos)
+    new ApiResponse(200,"Liked videos retrieved successfully", likedVideos)
   );
 });
 
@@ -139,4 +105,4 @@ const getLikeStatus = asynchandler(async (req, res) => {
   );
 });
 
-export {likeVideo,likecomment,getLikedVideos,getLikeStatus};
+export {likeVideo,getLikedVideos,getLikeStatus};

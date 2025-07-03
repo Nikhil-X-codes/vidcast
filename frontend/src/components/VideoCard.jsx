@@ -7,8 +7,8 @@ import {
   addComment,
   updateComment,
   deleteComment,
+  getLikeStatus
 } from '../services/addService';
-
 import Time from './Time';
 
 
@@ -51,13 +51,27 @@ const VideoCard = ({
     }
   };
 
+useEffect(() => {
+  const fetchStatus = async () => {
+    const result = await getLikeStatus(video._id);
+    if (result.success) {
+      setLiked(result.data.liked);
+    } else {
+      console.error(result.message);
+    }
+  };
+
+  fetchStatus();
+}, [video._id]);
+
+
 const handleLike = async () => {
   try {
-    const response = await likeVideo(video._id);
-    
-    if (response.status === "Video liked successfully") {
-      setLiked(prev => !prev);
-      setLikeCount(prev => liked ? prev - 1 : prev + 1);
+    const response = await likeVideo(video._id); 
+
+    if (response.success) {
+      setLiked(response.data.liked); 
+      setLikeCount(response.data.likecount);
     } else {
       console.error("Like operation was not successful:", response);
     }

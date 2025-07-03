@@ -26,13 +26,11 @@ const videoSchema = new Schema({
         type: String,
         required: true,
     },
-    duration:{
-        type:Number,
-    },
     views:{
         type:Number,
         default: 0,
     },
+
 
 },{timestamps:true})
 

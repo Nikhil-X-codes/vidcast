@@ -45,4 +45,15 @@ export const deleteComment = async (commentId) => {
   return response.data;
 }
 
+export const getLikeStatus = async (videoId) => {
+    try {
+    const response = await axios.post(`${apiUrl}/likes/status/${videoId}`);           
+    return response.data; 
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.data?.message || "Failed to like video"
+    };
+  }
+}
 

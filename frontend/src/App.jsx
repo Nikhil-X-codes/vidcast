@@ -9,7 +9,9 @@ import Playlist from './pages/Playlist';
 import History from './pages/History';
 import Sidebar from './components/Sidebar';
 import VideoManager from './pages/VideoManager';
-import Profile from './pages/Profile';
+import PlaylistManager from './components/PlaylistManager';
+import VideoList from './components/VideoList';
+import Like from './components/Like';
 
 const App = () => {
   return (
@@ -76,8 +78,46 @@ const App = () => {
               </div>
             }
           />
+          
+          <Route
+  path="/playlist"
+  element={
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        <Playlist />
+      </div>
+    </div>
+  }
+/>
+  
+  <Route
+  path="/playlist"
+  element={
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        <Playlist />
+        <VideoList />
+      </div>
+    </div>
+  }
+/>
+
+          <Route
+            path="/liked-videos"
+            element={
+              <div className="flex">
+                <Sidebar />
+                <div className="flex-1">
+                 <Like />
+                </div>
+              </div>
+            }
+          />
 
 
+  
         </Routes>
       </Router>
     </AuthProvider>

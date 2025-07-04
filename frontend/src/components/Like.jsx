@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getLikedVideos } from '../api/video';
+import { getLikedVideos } from '../services/addService';
 import VideoCard from './VideoCard';
-import Spinner from './Spinner';
 
-const LikedVideosPage = () => {
+
+const Like = () => {
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
@@ -13,15 +12,12 @@ const LikedVideosPage = () => {
   useEffect(() => {
     const fetchLikedVideos = async () => {
       try {
-        setLoading(true);
         const data = await getLikedVideos(page);
-        setVideos(prev => [...prev, ...data.videos]);
+        setVideos(prev => [...prev, ...data.videos]);         // data.videos is not defined
         setHasMore(data.hasNextPage);
         setError(null);
       } catch (err) {
         setError(err.message || 'Failed to fetch liked videos');
-      } finally {
-        setLoading(false);
       }
     };
     fetchLikedVideos();
@@ -47,25 +43,11 @@ const LikedVideosPage = () => {
         ))}
       </div>
 
-      {loading && <div className="text-center py-4"><Spinner /></div>}
-      
-      {hasMore && !loading && (
-        <div className="text-center mt-6">
-          <button 
-            onClick={() => setPage(prev => prev + 1)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            disabled={loading}
-          >
-            Load More
-          </button>
-        </div>
-      )}
-
-      {!hasMore && !loading && videos.length > 0 && (
+      {!hasMore && videos.length > 0 && (
         <p className="text-center text-gray-500 mt-4">No more videos to load</p>
       )}
 
-      {!loading && videos.length === 0 && (
+      {videos.length === 0 && (
         <div className="text-center py-10">
           <p className="text-gray-500">You haven't liked any videos yet</p>
         </div>
@@ -74,4 +56,4 @@ const LikedVideosPage = () => {
   );
 };
 
-export default LikedVideosPage;
+export default Like;

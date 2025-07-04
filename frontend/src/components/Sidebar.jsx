@@ -12,9 +12,10 @@ const Sidebar = () => {
   const links = [
     { name: 'Home', path: '/home', icon: <FaHome /> },
     { name: 'Subscription', path: '/subscription', icon: <FaBell /> },
-    { name: 'Playlist', path: '/playlist', icon: <FaList /> },
     { name: 'My Video', path: '/my-video', icon: <FaVideo /> },
     { name: 'Watch History', path: '/history', icon: <FaHistory /> },
+    {name:'Liked Videos', path:'/liked-videos', icon:<FaVideo />},
+    {name:'My Playlist', path:'/playlist', icon:<FaList />},
   ];
 
   return (

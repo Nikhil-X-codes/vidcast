@@ -5,12 +5,10 @@ import SignInPage from './pages/Signin';
 import LoginPage from './pages/Login';
 import Home from './pages/Home';
 import Subscription from './pages/Subscription';
-import Playlist from './pages/Playlist';
 import History from './pages/History';
 import Sidebar from './components/Sidebar';
 import VideoManager from './pages/VideoManager';
 import PlaylistManager from './components/PlaylistManager';
-import VideoList from './components/VideoList';
 import Like from './components/Like';
 
 const App = () => {
@@ -45,17 +43,32 @@ const App = () => {
               </div>
             }
           />
-          <Route
-            path="/playlist"
-            element={
-              <div className="flex">
-                <Sidebar />
-                <div className="flex-1">
-                  <Playlist />
-                </div>
+
+ <Route
+          path="/playlist"
+          element={
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <PlaylistManager />
               </div>
-            }
-          />
+            </div>
+          }
+        />
+
+        {/* Playlist detail/edit route */}
+        <Route
+          path="/playlist/:playlistId"
+          element={
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1">
+                <PlaylistManager />
+              </div>
+            </div>
+          }
+        />
+
           <Route
             path="/my-video"
             element={
@@ -79,30 +92,6 @@ const App = () => {
             }
           />
           
-          <Route
-  path="/playlist"
-  element={
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1">
-        <Playlist />
-      </div>
-    </div>
-  }
-/>
-  
-  <Route
-  path="/playlist"
-  element={
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1">
-        <Playlist />
-        <VideoList />
-      </div>
-    </div>
-  }
-/>
 
           <Route
             path="/liked-videos"

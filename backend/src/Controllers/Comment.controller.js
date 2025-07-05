@@ -16,7 +16,7 @@ const addComment = asynchandler(async (req, res) => {
         video: videoId,
         CommentBy: req.user._id,
         content: commentText
-    });
+    })
 
     res.status(201).json(new ApiResponse(200,"Comment added successfully", comment));
 })

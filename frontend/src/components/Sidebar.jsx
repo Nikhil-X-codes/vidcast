@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaBell, FaList, FaVideo, FaHistory, FaBars } from 'react-icons/fa';
+import { FaHome, FaBell, FaList, FaVideo, FaHistory, FaBars,FaHeart  } from 'react-icons/fa';
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -14,7 +14,7 @@ const Sidebar = () => {
     { name: 'Subscription', path: '/subscription', icon: <FaBell /> },
     { name: 'My Video', path: '/my-video', icon: <FaVideo /> },
     { name: 'Watch History', path: '/history', icon: <FaHistory /> },
-    {name:'Liked Videos', path:'/liked-videos', icon:<FaVideo />},
+    {name:'Liked Videos', path:'/liked-videos', icon:<FaHeart />},
     {name:'My Playlist', path:'/playlist', icon:<FaList />},
   ];
 

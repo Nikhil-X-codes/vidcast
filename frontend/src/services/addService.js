@@ -46,7 +46,7 @@ export const addComment = async (videoId, commentText) => {
 export const updateComment = async (commentId, commentText) => {
   try {
     const response = await axios.patch(`${apiUrl}/comments/update/${commentId}`, {
-      text: commentText
+      commentText:commentText
     });
     return {
       success: true,
@@ -69,7 +69,7 @@ export const getComments = async (videoId) => {
     return {
       success: true,
       status: response.status,
-      data: response.data.data || response.data // Handle different response structures
+      data: response.data.data || response.data 
     };
   } catch (error) {
     return {
@@ -82,8 +82,21 @@ export const getComments = async (videoId) => {
 };
 
 export const deleteComment = async (commentId) => {
-  const response = await axios.delete(`${apiUrl}/comments/${commentId}`);
-  return response.data;
+  try {
+    const response = await axios.delete(`${apiUrl}/comments/delete/${commentId}`);
+    return {
+      success: true,
+      status: response.status,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Failed to delete comment",
+      error: error.message
+    };
+  }
 }
 
 export const getLikeStatus = async (videoId) => {

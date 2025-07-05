@@ -17,7 +17,7 @@ const createPlaylist = asynchandler(async (req, res) => {
         owner: userId,
     });
 
-    res.status(201).json(new ApiResponse(playlist, "Playlist created successfully"));
+    res.status(201).json(new ApiResponse(200,"Playlist created successfully",playlist));
 });
 
 const deletePlaylist = asynchandler(async (req, res) => {
@@ -30,7 +30,7 @@ const deletePlaylist = asynchandler(async (req, res) => {
         throw new ApiError(404, "Playlist not found");
     }
 
-    res.status(200).json(new ApiResponse(null, "Playlist deleted successfully"));
+    res.status(200).json(new ApiResponse(200,"Playlist deleted successfully",null));
 });
 
 const updatePlaylist = asynchandler(async (req, res) => {
@@ -54,7 +54,7 @@ const updatePlaylist = asynchandler(async (req, res) => {
 
     await playlist.save();
 
-    res.status(200).json(new ApiResponse(playlist, "Playlist updated successfully"));
+    res.status(200).json(new ApiResponse(200,"Playlist updated successfully",playlist));
 })
 
 const addVideoToPlaylist = asynchandler(async (req, res) => {
@@ -74,7 +74,7 @@ const addVideoToPlaylist = asynchandler(async (req, res) => {
     playlist.videos.push(videoId);
     await playlist.save();
 
-    res.status(200).json(new ApiResponse(playlist, "Video added to playlist successfully"));
+    res.status(200).json(new ApiResponse(200,"Video added to playlist successfully",playlist));
 });
 
 const removeVideoFromPlaylist = asynchandler(async (req, res) => {
@@ -97,7 +97,7 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
     playlist.videos = playlist.videos.filter(video => video.toString() !== videoId);
     await playlist.save(); 
 
-    res.status(200).json(new ApiResponse(playlist, "Video removed from playlist successfully"));
+    res.status(200).json(new ApiResponse(200,"Video removed from playlist successfully",playlist));
 });
 
 const getplaylist=asynchandler(async (req, res) => {
@@ -110,7 +110,7 @@ const getplaylist=asynchandler(async (req, res) => {
         throw new ApiError(404, "Playlist not found");
     }
 
-    res.status(200).json(new ApiResponse(playlist, "Playlist retrieved successfully"));
+    res.status(200).json(new ApiResponse(200,"Playlist retrieved successfully", playlist));
 });
 
 

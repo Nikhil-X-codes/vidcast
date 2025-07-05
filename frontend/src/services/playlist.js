@@ -87,7 +87,7 @@ const getPlaylist = async (playlistId) => {
     }
 };
 
-export default {
+export {
     createPlaylist,
     deletePlaylist,
     updatePlaylist,

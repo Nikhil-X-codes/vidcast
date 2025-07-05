@@ -325,7 +325,7 @@ useEffect(() => {
                 </p>
                 <p className="text-sm">{comment.content}</p>
               </div>
-              {comment.CommentBy?._id === localStorage.getItem('userId') && (
+              {comment.CommentBy === localStorage.getItem('userId') || (
                 <div className="flex items-center space-x-2">
                   <div className="relative group">
                     <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
@@ -348,20 +348,12 @@ useEffect(() => {
                       </button>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleCommentLike(comment._id)}
-                    className={`flex items-center space-x-1 ${comment.isLiked ? 'text-red-600' : 'text-gray-600'} hover:${comment.isLiked ? 'text-red-800' : 'text-gray-800'} text-xs`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" facility={comment.isLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span>{comment.likesCount || 0}</span>
-                  </button>
+             
                 </div>
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {new Date(comment.createdAt).toLocaleString()}
+              <Time date={comment.createdAt} />
             </p>
           </div>
         )}

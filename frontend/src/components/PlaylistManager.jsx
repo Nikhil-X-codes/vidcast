@@ -1,14 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import playlist from '../services/playlist';
 import { useParams, useNavigate } from 'react-router-dom';
 import VideoList from './VideoList';
+import {
+    createPlaylist,
+    deletePlaylist,
+    updatePlaylist,
+    addVideoToPlaylist,
+    removeVideoFromPlaylist,
+    getPlaylist
+} from '../services/playlist'
 
 const PlaylistManager = () => {
     const { playlistId } = useParams();
     const navigate = useNavigate();
-    const [playlist, setPlaylist] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [playlist, setPlaylist] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         name: '',
@@ -26,7 +33,7 @@ const PlaylistManager = () => {
     const loadPlaylist = async () => {
         try {
             setLoading(true);
-            const response = await playlistService.getPlaylist(playlistId);
+            const response = await getPlaylist(playlistId);
             setPlaylist(response.data);
             setFormData({
                 name: response.data.name,
@@ -43,7 +50,7 @@ const PlaylistManager = () => {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            const response = await playlistService.createPlaylist(formData.name, formData.description);
+            const response = await createPlaylist(formData.name, formData.description);
             navigate(`/playlist/${response.data._id}`);
         } catch (err) {
             setError(err.message || 'Failed to create playlist');
@@ -53,7 +60,7 @@ const PlaylistManager = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            await playlistService.updatePlaylist(playlistId, formData.name, formData.description);
+            await updatePlaylist(playlistId, formData.name, formData.description);
             setEditing(false);
             loadPlaylist();
         } catch (err) {
@@ -63,7 +70,7 @@ const PlaylistManager = () => {
 
     const handleDelete = async () => {
         try {
-            await playlistService.deletePlaylist(playlistId);
+            await deletePlaylist(playlistId);
             navigate('/playlists');
         } catch (err) {
             setError(err.message || 'Failed to delete playlist');
@@ -72,7 +79,7 @@ const PlaylistManager = () => {
 
     const handleAddVideo = async () => {
         try {
-            await playlistService.addVideoToPlaylist(playlistId, newVideoId);
+            await addVideoToPlaylist(playlistId, newVideoId);
             setNewVideoId('');
             loadPlaylist();
         } catch (err) {
@@ -82,7 +89,7 @@ const PlaylistManager = () => {
 
     const handleRemoveVideo = async (videoId) => {
         try {
-            await playlistService.removeVideoFromPlaylist(playlistId, videoId);
+            await removeVideoFromPlaylist(playlistId, videoId);
             loadPlaylist();
         } catch (err) {
             setError(err.message || 'Failed to remove video from playlist');
@@ -91,96 +98,143 @@ const PlaylistManager = () => {
 
     if (loading) return <div>Loading...</div>;
 
-    return (
-        <div className="playlist-manager">
-            {error && <div className="error">{error}</div>}
+   return (
+    <div className="max-w-5xl mx-auto p-6">
+        {error && (
+            <div className="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">
+                {error}
+            </div>
+        )}
 
-            {!playlistId ? (
-                <div className="create-playlist">
-                    <h2>Create New Playlist</h2>
-                    <form onSubmit={handleCreate}>
+        {!playlistId ? (
+            <div className="bg-white shadow-lg rounded-xl p-6">
+                <h2 className="text-2xl font-semibold mb-4">Create New Playlist</h2>
+                <form onSubmit={handleCreate} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Name:</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            required
+                            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Description:</label>
+                        <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            required
+                            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Create Playlist
+                    </button>
+                </form>
+            </div>
+        ) : (
+            <div className="bg-white shadow-lg rounded-xl p-6 space-y-6">
+                {editing ? (
+                    <form onSubmit={handleUpdate} className="space-y-4">
                         <div>
-                            <label>Name:</label>
+                            <label className="block text-sm font-medium mb-1">Name:</label>
                             <input
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                                 required
+                                className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                         <div>
-                            <label>Description:</label>
+                            <label className="block text-sm font-medium mb-1">Description:</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                                 required
+                                className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
-                        <button type="submit">Create Playlist</button>
+                        <div className="space-x-3">
+                            <button
+                                type="submit"
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEditing(false)}
+                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </form>
-                </div>
-            ) : (
-                <div className="playlist-details">
-                    {editing ? (
-                        <form onSubmit={handleUpdate}>
-                            <div>
-                                <label>Name:</label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Description:</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <button type="submit">Save Changes</button>
-                            <button type="button" onClick={() => setEditing(false)}>Cancel</button>
-                        </form>
-                    ) : (
-                        <>
-                            <h2>{playlist.name}</h2>
-                            <p>{playlist.description}</p>
-                            <div className="actions">
-                                <button onClick={() => setEditing(true)}>Edit</button>
-                                <button onClick={handleDelete}>Delete Playlist</button>
-                            </div>
-                        </>
-                    )}
-
-                    <div className="videos-section">
-                        <h3>Videos in this Playlist</h3>
-                        {playlist.videos && playlist.videos.length > 0 ? (
-                            <VideoList 
-                                videos={playlist.videos} 
-                                onRemove={handleRemoveVideo}
-                                showRemove={true}
-                            />
-                        ) : (
-                            <p>No videos in this playlist yet.</p>
-                        )}
-
-                        <div className="add-video">
-                            <h4>Add Video</h4>
-                            <input
-                                type="text"
-                                value={newVideoId}
-                                onChange={(e) => setNewVideoId(e.target.value)}
-                                placeholder="Enter Video ID"
-                            />
-                            <button onClick={handleAddVideo}>Add Video</button>
+                ) : (
+                    <>
+                        <div>
+                            <h2 className="text-2xl font-bold">{playlist.name}</h2>
+                            <p className="text-gray-600">{playlist.description}</p>
                         </div>
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => setEditing(true)}
+                                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                            >
+                                Delete Playlist
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                <div className="mt-6">
+                    <h3 className="text-xl font-semibold mb-2">Videos in this Playlist</h3>
+                    {playlist.videos && playlist.videos.length > 0 ? (
+                        <VideoList
+                            videos={playlist.videos}
+                            onRemove={handleRemoveVideo}
+                            showRemove={true}
+                        />
+                    ) : (
+                        <p className="text-gray-500">No videos in this playlist yet.</p>
+                    )}
+                </div>
+
+                <div className="mt-6">
+                    <h4 className="text-lg font-medium mb-2">Add Video</h4>
+                    <div className="flex space-x-3">
+                        <input
+                            type="text"
+                            value={newVideoId}
+                            onChange={(e) => setNewVideoId(e.target.value)}
+                            placeholder="Enter Video ID"
+                            className="border border-gray-300 px-3 py-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                            onClick={handleAddVideo}
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
+                            Add Video
+                        </button>
                     </div>
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        )}
+    </div>
+);
+
 };
 
 export default PlaylistManager;

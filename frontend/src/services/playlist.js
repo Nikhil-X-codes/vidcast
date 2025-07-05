@@ -34,7 +34,7 @@ const deletePlaylist = async (playlistId) => {
 
 const updatePlaylist = async (playlistId, name, description) => {
     try {
-        const response = await axios.put(`${API_URL}/playlists/${playlistId}`, {
+        const response = await axios.patch(`${API_URL}/playlists/${playlistId}`, {
             name,
             description
         }, {
@@ -74,7 +74,24 @@ const removeVideoFromPlaylist = async (playlistId, videoId) => {
     }
 };
 
-const getPlaylist = async (playlistId) => {
+const fetchAllPlaylists = async (userId) => {
+    try {
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+        
+        const response = await axios.get(`${API_URL}/playlists/user/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+const fetchPlaylist = async (playlistId) => {
     try {
         const response = await axios.get(`${API_URL}/playlists/${playlistId}`, {
             headers: {
@@ -93,5 +110,7 @@ export {
     updatePlaylist,
     addVideoToPlaylist,
     removeVideoFromPlaylist,
-    getPlaylist
+    fetchAllPlaylists,
+    fetchPlaylist
 };
+

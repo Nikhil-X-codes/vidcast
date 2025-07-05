@@ -2,6 +2,7 @@ import asynchandler from "../utils/asynchandler.js";
 import { Playlists } from "../models/Playlist.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/apiresponse.js"; 
+import mongoose from "mongoose";
 
 const createPlaylist = asynchandler(async (req, res) => {
     const { name, description } = req.body;
@@ -49,8 +50,8 @@ const updatePlaylist = asynchandler(async (req, res) => {
         throw new ApiError(404, "Playlist not found");
     }
 
-    playlist.name = name;
-    playlist.description = description; 
+    if(name) playlist.name = name;
+    if(description) playlist.description = description; 
 
     await playlist.save();
 
@@ -83,7 +84,7 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
 
     const playlist = await Playlists.findOne({ 
         _id: playlistId,
-        owner: userId 
+        owner: userId
     });
 
     if (!playlist) {
@@ -100,18 +101,40 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200,"Video removed from playlist successfully",playlist));
 });
 
-const getplaylist=asynchandler(async (req, res) => {
+const getplaylist = asynchandler(async (req, res) => {
     const { playlistId } = req.params;
-    const userId = req.user.id;
 
-    const playlist = await Playlists.findOne({ _id: playlistId, owner: userId }).populate('videos');
+    if (!mongoose.Types.ObjectId.isValid(playlistId)) {
+        throw new ApiError(400, "Invalid playlist ID");
+    }
+
+    const playlist = await Playlists.findById(playlistId);
 
     if (!playlist) {
         throw new ApiError(404, "Playlist not found");
     }
 
-    res.status(200).json(new ApiResponse(200,"Playlist retrieved successfully", playlist));
+    res.status(200).json(
+        new ApiResponse(200, "Playlist retrieved successfully", playlist)
+    );
 });
 
+const getAllPlaylists = asynchandler(async (req, res) => {
+    const { userId } = req.params;
 
-export { createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist, getplaylist };
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new ApiError(400, "Invalid user ID");
+    }
+
+    const playlists = await Playlists.find({ owner: userId });
+
+    if (!playlists.length) {
+        throw new ApiError(404, "No playlists found for this user");
+    }
+
+    res.status(200).json(
+        new ApiResponse(200, "Playlists retrieved successfully", playlists)
+    );
+});
+
+export { createPlaylist, deletePlaylist, updatePlaylist, addVideoToPlaylist, removeVideoFromPlaylist, getplaylist, getAllPlaylists };

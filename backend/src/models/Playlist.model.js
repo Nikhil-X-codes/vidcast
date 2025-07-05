@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const PlaylistsSchema = new Schema({
  
@@ -17,9 +18,12 @@ const PlaylistsSchema = new Schema({
  },
  description:{
     type: String,
+    required: true,
  }
 
 }, { timestamps: true });
+
+PlaylistsSchema.plugin(mongooseAggregatePaginate);
 
 export const Playlists= mongoose.model("Playlists",PlaylistsSchema);
 

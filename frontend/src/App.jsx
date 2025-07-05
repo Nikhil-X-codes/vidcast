@@ -9,6 +9,7 @@ import History from './pages/History';
 import Sidebar from './components/Sidebar';
 import VideoManager from './pages/VideoManager';
 import PlaylistManager from './components/PlaylistManager';
+import VideoList from './components/VideoList';
 import Like from './components/Like';
 
 const App = () => {
@@ -43,7 +44,6 @@ const App = () => {
               </div>
             }
           />
-
  <Route
           path="/playlist"
           element={
@@ -56,7 +56,6 @@ const App = () => {
           }
         />
 
-        {/* Playlist detail/edit route */}
         <Route
           path="/playlist/:playlistId"
           element={
@@ -68,7 +67,7 @@ const App = () => {
             </div>
           }
         />
-
+          
           <Route
             path="/my-video"
             element={

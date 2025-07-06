@@ -6,6 +6,16 @@ import {
   changePassword,
   updateUsername,
 } from '../services/userService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faUser, 
+  faImage, 
+  faCamera, 
+  faLock, 
+  faSave,
+  faUpload,
+  faCheckCircle
+} from '@fortawesome/free-solid-svg-icons';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -48,36 +58,34 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
- const handleImageUpload = async (e) => {
-  e.preventDefault();
-  if (!avatarFile && !coverFile) {
-    setError('Please select at least one image to upload');
-    return;
-  }
+  const handleImageUpload = async (e) => {
+    e.preventDefault();
+    if (!avatarFile && !coverFile) {
+      setError('Please select at least one image to upload');
+      return;
+    }
 
-  const formData = new FormData();
+    const formData = new FormData();
+    if (avatarFile) formData.append('avatar', avatarFile);
+    if (coverFile) formData.append('coverimage', coverFile);
 
-  // 🔧 Fix field names to match backend
-  if (avatarFile) formData.append('avatar', avatarFile);
-  if (coverFile) formData.append('coverimage', coverFile);
-
-  try {
-    const response = await updateUserImages(formData);
-    setUser(prev => ({
-      ...prev,
-      avatar: response.avatar,
-      coverimage: response.coverimage,
-      ...response
-    }));
-    setAvatarPreview(response.avatar);
-    setCoverPreview(response.coverimage);
-    setAvatarFile(null);
-    setCoverFile(null);
-    showSuccess('Images updated successfully');
-  } catch (err) {
-    setError(err.message);
-  }
-};
+    try {
+      const response = await updateUserImages(formData);
+      setUser(prev => ({
+        ...prev,
+        avatar: response.avatar,
+        coverimage: response.coverimage,
+        ...response
+      }));
+      setAvatarPreview(response.avatar);
+      setCoverPreview(response.coverimage);
+      setAvatarFile(null);
+      setCoverFile(null);
+      showSuccess('Images updated successfully');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -148,145 +156,206 @@ const Profile = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
+    <div className="max-w-4xl mx-auto p-4 md:p-6">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
+        <FontAwesomeIcon icon={faUser} className="mr-3 text-blue-600" />
+        Profile Settings
+      </h1>
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 flex items-center">
+          <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
           {success}
         </div>
       )}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
 
       {/* Profile Display */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="relative h-48 mb-16">
-          {coverPreview && (
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8 border border-gray-100">
+        <div className="relative h-48 md:h-56 bg-gradient-to-r from-blue-500 to-purple-600">
+          {coverPreview ? (
             <img 
               src={coverPreview} 
               alt="Cover" 
-              className="w-full h-full object-cover rounded-t-lg"
+              className="w-full h-full object-cover"
             />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <FontAwesomeIcon icon={faImage} className="text-4xl text-gray-400" />
+            </div>
           )}
-          <div className="absolute -bottom-12 left-6">
-            {avatarPreview && (
-              <img 
-                src={avatarPreview} 
-                alt="Avatar" 
-                className="w-24 h-24 rounded-full border-4 border-white object-cover"
-              />
-            )}
+          <div className="absolute -bottom-16 left-6">
+            <div className="relative group">
+              {avatarPreview ? (
+                <img 
+                  src={avatarPreview} 
+                  alt="Avatar" 
+                  className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center shadow-lg">
+                  <FontAwesomeIcon icon={faUser} className="text-4xl text-gray-400" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <FontAwesomeIcon icon={faCamera} className="text-white text-xl" />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="mt-12">
-          <h2 className="text-xl font-semibold">{user?.username}</h2>
+        <div className="pt-20 pb-6 px-6">
+          <h2 className="text-2xl font-bold text-gray-800">{user?.username}</h2>
           <p className="text-gray-600">{user?.email}</p>
         </div>
       </div>
 
       {/* Update Username */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Update Username</h2>
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+          <FontAwesomeIcon icon={faUser} className="mr-2 text-blue-500" />
+          Update Username
+        </h2>
         <form onSubmit={handleUsernameUpdate}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Username</label>
+            <label className="block text-gray-700 mb-2 font-medium">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
           >
+            <FontAwesomeIcon icon={faSave} className="mr-2" />
             Update Username
           </button>
         </form>
       </div>
 
       {/* Update Images */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Update Profile Images</h2>
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+          <FontAwesomeIcon icon={faImage} className="mr-2 text-blue-500" />
+          Update Profile Images
+        </h2>
         <form onSubmit={handleImageUpload}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-gray-700 mb-2">Avatar</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, 'avatar')}
-                className="w-full"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer">
+              <label className="block cursor-pointer">
+                <div className="flex flex-col items-center justify-center">
+                  <FontAwesomeIcon icon={faUpload} className="text-3xl text-blue-500 mb-3" />
+                  <span className="block text-gray-700 font-medium mb-2">Avatar</span>
+                  <span className="block text-sm text-gray-500 mb-3">Recommended: 200x200px</span>
+                  {avatarFile && (
+                    <span className="block text-sm text-green-600 mb-2">
+                      {avatarFile.name} selected
+                    </span>
+                  )}
+                  <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
+                    Choose File
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, 'avatar')}
+                  className="hidden"
+                />
+              </label>
             </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Cover Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, 'cover')}
-                className="w-full"
-              />
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer">
+              <label className="block cursor-pointer">
+                <div className="flex flex-col items-center justify-center">
+                  <FontAwesomeIcon icon={faUpload} className="text-3xl text-blue-500 mb-3" />
+                  <span className="block text-gray-700 font-medium mb-2">Cover Image</span>
+                  <span className="block text-sm text-gray-500 mb-3">Recommended: 1500x500px</span>
+                  {coverFile && (
+                    <span className="block text-sm text-green-600 mb-2">
+                      {coverFile.name} selected
+                    </span>
+                  )}
+                  <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
+                    Choose File
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, 'cover')}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
           <button 
             type="submit"
             disabled={!avatarFile && !coverFile}
-            className={`px-4 py-2 rounded-lg transition ${(!avatarFile && !coverFile) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+            className={`px-6 py-3 rounded-lg transition flex items-center justify-center w-full ${
+              (!avatarFile && !coverFile) 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
           >
+            <FontAwesomeIcon icon={faUpload} className="mr-2" />
             Upload Images
           </button>
         </form>
       </div>
 
       {/* Change Password */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Change Password</h2>
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+          <FontAwesomeIcon icon={faLock} className="mr-2 text-blue-500" />
+          Change Password
+        </h2>
         <form onSubmit={handlePasswordChange}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Current Password</label>
+            <label className="block text-gray-700 mb-2 font-medium">Current Password</label>
             <input
               type="password"
               name="currentPassword"
               value={passwordData.currentPassword}
               onChange={handlePasswordChangeInput}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">New Password</label>
+            <label className="block text-gray-700 mb-2 font-medium">New Password</label>
             <input
               type="password"
               name="newPassword"
               value={passwordData.newPassword}
               onChange={handlePasswordChangeInput}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Confirm New Password</label>
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-medium">Confirm New Password</label>
             <input
               type="password"
               name="confirmPassword"
               value={passwordData.confirmPassword}
               onChange={handlePasswordChangeInput}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
           </div>
           <button 
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center"
           >
+            <FontAwesomeIcon icon={faLock} className="mr-2" />
             Change Password
           </button>
         </form>

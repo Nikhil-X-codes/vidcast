@@ -7,6 +7,7 @@ import {
   updateVideo,
   getview,
 } from '../services/videoService';
+import { FaUpload, FaVideo, FaImage, FaSpinner } from 'react-icons/fa';
 
 const VideoManager = () => {
   const [videos, setVideos] = useState([]);
@@ -86,78 +87,139 @@ const VideoManager = () => {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Video Manager</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Video Manager</h1>
+          <p className="text-gray-600">Upload and manage your video collection</p>
+        </div>
 
-      <form onSubmit={handleUpload} className="bg-white p-4 rounded shadow mb-8 space-y-4">
-        <label className="block">
-          <span className="text-gray-700 font-medium">Title</span>
-          <input
-            type="text"
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value})}
-            className="w-full mt-1 p-2 border rounded"
-            required
-          />
-        </label>
+        {/* Upload Form */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-10 transition-all hover:shadow-xl">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-4">
+            <h2 className="text-xl font-semibold text-white flex items-center">
+              <FaUpload className="mr-2" /> Upload New Video
+            </h2>
+          </div>
+          
+          <form onSubmit={handleUpload} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-medium">Title</label>
+                <input
+                  type="text"
+                  placeholder="Enter video title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value})}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
 
-        <label className="block">
-          <span className="text-gray-700 font-medium">Description</span>
-          <textarea
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full mt-1 p-2 border rounded"
-            required
-          />
-        </label>
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-medium">Description</label>
+                <textarea
+                  placeholder="Enter video description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows="1"
+                  required
+                />
+              </div>
+            </div>
 
-        <label className="block">
-          <span className="text-gray-700 font-medium">Upload Video File (MP4, etc.)</span>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => setVideoFile(e.target.files[0])}
-            className="w-full mt-1"
-            required
-          />
-        </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-medium flex items-center">
+                  <FaVideo className="mr-2" /> Video File
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setVideoFile(e.target.files[0])}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    required
+                  />
+                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <p className="text-gray-600">{videoFile ? videoFile.name : 'Select video file (MP4, etc.)'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-        <label className="block">
-          <span className="text-gray-700 font-medium">Upload Thumbnail Image (JPG, PNG)</span>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setThumbnailFile(e.target.files[0])}
-            className="w-full mt-1"
-            required
-          />
-        </label>
+              <div className="space-y-2">
+                <label className="block text-gray-700 font-medium flex items-center">
+                  <FaImage className="mr-2" /> Thumbnail Image
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setThumbnailFile(e.target.files[0])}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    required
+                  />
+                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <p className="text-gray-600">{thumbnailFile ? thumbnailFile.name : 'Select thumbnail (JPG, PNG)'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          disabled={loading}
-        >
-          {loading ? 'Uploading...' : 'Upload Video'}
-        </button>
-      </form>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center transition-colors shadow-md hover:shadow-lg"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <FaUpload className="mr-2" />
+                    Upload Video
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
 
-      <div className="space-y-6">
-        {videos.length > 0 ? (
-          videos.map((video) => (
-            <VideoCard
-              key={video._id}
-              video={video}
-              onDelete={handleDelete}
-              onUpdate={handleUpdate}
-              onView={handleView}
-            />
-          ))
-        ) : (
-          <p className="text-gray-500">No videos found.</p>
-        )}
+        {/* Video List */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Your Videos ({videos.length})</h2>
+          
+          {videos.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video) => (
+                <VideoCard
+                  key={video._id}
+                  video={video}
+                  onDelete={handleDelete}
+                  onUpdate={handleUpdate}
+                  onView={handleView}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow p-8 text-center">
+              <div className="text-gray-400 mb-4">
+                <FaVideo size={48} className="mx-auto opacity-50" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-700 mb-2">No Videos Found</h3>
+              <p className="text-gray-500">Upload your first video using the form above</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

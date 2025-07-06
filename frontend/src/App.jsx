@@ -11,9 +11,11 @@ import VideoManager from './pages/VideoManager';
 import PlaylistManager from './components/PlaylistManager';
 import VideoList from './components/VideoList';
 import Like from './components/Like';
+import { ThemeProvider } from './context/Toggle';
 
 const App = () => {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <Router>
         <Routes>
@@ -105,10 +107,11 @@ const App = () => {
           />
 
 
-  
         </Routes>
       </Router>
+      
     </AuthProvider>
+    </ThemeProvider>
   );
 };
 

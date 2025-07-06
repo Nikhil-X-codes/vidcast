@@ -126,7 +126,8 @@ const getAllPlaylists = asynchandler(async (req, res) => {
         throw new ApiError(400, "Invalid user ID");
     }
 
-    const playlists = await Playlists.find({ owner: userId });
+    const playlists = await Playlists.find({ owner: userId })
+    .populate('videos', 'title description thumbnail video')
 
     if (!playlists.length) {
         throw new ApiError(404, "No playlists found for this user");

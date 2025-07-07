@@ -16,10 +16,21 @@ export const likeVideo = async (videoId) => {
 
 
 export const getLikedVideos = async (page = 1, limit = 10) => {
+
+  try{
   const response = await axios.get(`${apiUrl}/likes/videos`, {
     params: { page, limit }
   });
-  return response.data;
+   return response.data;
+  }
+  catch (error) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Failed to fetch liked videos",
+      error: error.message
+    };
+  }
 };
 
 export const addComment = async (videoId, commentText) => {

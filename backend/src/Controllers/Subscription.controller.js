@@ -22,14 +22,14 @@ const toggleSubscribe = asynchandler(async (req, res) => {
 
     if (existingSubscription) {
         await Subscription.deleteOne({ _id: existingSubscription._id });
-        return res.status(200).json(new ApiResponse("Unsubscribed successfully", true));
+        return res.status(200).json(new ApiResponse(200,"Unsubscribed successfully", true));
     } else {
         const newSubscription = new Subscription({
             subscriber: userId,
             channel: channelId,
         });
         await newSubscription.save();
-        return res.status(201).json(new ApiResponse("Subscribed successfully", true));
+        return res.status(201).json(new ApiResponse(200,"Subscribed successfully", true));
     }
 });
 
@@ -38,36 +38,45 @@ const listSubscribedChannels = asynchandler(async (req, res) => {
 
     const subscriptions = await Subscription.find({ subscriber: userId }).populate(
         "channel",
-        "avatar"
+        "avatar username"
     );
 
     const channels = subscriptions.map((sub) => sub.channel);
 
-    return res.status(200).json(new ApiResponse({
+      return res.status(200).json(new ApiResponse(
+        200,
+        "Subscribed channels retrieved successfully",
+        {
         count: channels.length,
         channels: channels,
     }, true));
 });
 
-const listSubscribersOfChannel = asynchandler(async (req, res) => {
-    const { channelId } = req.params;
+const listSubscribersOfChannel = asynchandler(async (req, res, next) => {
+  const { channelId } = req.params;
 
-    if (!channelId) {
-        return next(new ApiError("Channel ID is required", 400));
-    }
+  if (!channelId) {
+    return next(new ApiError("Channel ID is required", 400));
+  }
 
-    const subscribers = await Subscription.find({ channel: channelId }).populate(
-        "subscriber",
-        "avatar name"
-    );
+  const subscribers = await Subscription.find({ channel: channelId }).populate(
+    "subscriber",
+    "_id avatar username" // <-- Include _id here
+  );
 
-    const subscriberList = subscribers.map(sub => sub.subscriber);
+  const subscriberList = subscribers.map(sub => sub.subscriber);
 
-    return res.status(200).json(new ApiResponse({
-        count: subscriberList.length,
-        subscribers: subscriberList
-    }, true));
+  return res.status(200).json(new ApiResponse(
+    200,
+    "Subscribers retrieved successfully",
+    {
+      count: subscriberList.length,
+      subscribers: subscriberList
+    },
+    true
+  ));
 });
+
 
 
 export { toggleSubscribe, listSubscribedChannels, listSubscribersOfChannel };

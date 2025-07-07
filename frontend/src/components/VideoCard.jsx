@@ -10,6 +10,11 @@ import {
   getComments
 } from '../services/addService';
 import Time from './Time';
+import {
+  togglebtn,
+  listSubscribedChannels,
+  listSubscribersOfChannel
+} from '../services/subservice';
 
 const VideoCard = ({
   video,
@@ -32,49 +37,87 @@ const VideoCard = ({
   const [showComments, setShowComments] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(0);
 
- useEffect(() => {
-  const fetchStatus = async () => {
-    try {
-      const result = await getLikeStatus(video._id);
-      if (result.success) {
-        setLiked(result.data.liked);
-        setLikeCount(result.data.likecount || 0);
-      } else {
-        console.error(result.message);
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const result = await getLikeStatus(video._id);
+        if (result.success) {
+          setLiked(result.data.liked);
+          setLikeCount(result.data.likecount || 0);
+        } else {
+          console.error(result.message);
+        }
+      } catch (error) {
+        console.error("Error fetching like status:", error);
       }
-    } catch (error) {
-      console.error("Error fetching like status:", error);
-    }
-  };
+    };
 
-  fetchStatus();
-}, [video._id]);
+    fetchStatus();
+  }, [video._id]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const result = await getComments(video._id);
+        if (result.success) {
+          setComments(result.data); 
+        } else {
+          console.error("Error:", result.message);
+        }
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    if (showComments) {
+      fetchComments();
+    }
+  }, [showComments, video._id]); 
+
 
 useEffect(() => {
-  const fetchComments = async () => {
+
+  const checkSubscriptionStatus = async () => {
     try {
-      const result = await getComments(video._id);
-      if (result.success) {
-        setComments(result.data); 
-      } else {
-        console.error("Error:", result.message);
-      }
+      const response = await listSubscribersOfChannel(video.owner?._id);
+      const subscribers = response?.data?.subscribers || [];
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?._id;
+
+      const isSubbed = subscribers.some(sub => sub._id === userId);
+      setIsSubscribed(isSubbed);
+
+      setSubscriberCount(subscribers.length);
+
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      console.error("Error checking subscription:", error);
     }
   };
 
-  if (showComments) {
-    fetchComments();
+  if (video.owner?._id) {
+    checkSubscriptionStatus();
   }
-}, [showComments, video._id]); 
+}, [video.owner?._id]);
 
+
+const handleSubscribe = async () => {
+  try {
+    const response = await listSubscribersOfChannel(video.owner._id);
+    if (response.success) {
+      setIsSubscribed(prev => !prev);
+    }
+  } catch (err) {
+    console.error("Failed to subscribe:", err);
+  }
+};
 
   const handleLike = async () => {
     try {
       const response = await likeVideo(video._id); 
-
       if (response.success) {
         setLiked(response.data.liked); 
         setLikeCount(response.data.likecount || 0);
@@ -146,7 +189,6 @@ useEffect(() => {
     setIsEditing(false);
   };
 
-
   return (
     <div 
       className="w-full max-w-sm bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl"
@@ -208,11 +250,11 @@ useEffect(() => {
       <div className="p-4">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <img 
-              src={video.channel?.avatar || "https://yt3.googleusercontent.com/ytc/APkrFKaqca-xQcJr0zXj1X6J4KZijQm7n1Zz1Y6L5Q=s176-c-k-c0x00ffffff-no-rj"} 
-              alt="channel" 
-              className="w-10 h-10 rounded-full"
-            />
+         <img 
+  src={video.owner?.avatar}  //
+  alt="channel" 
+  className="w-10 h-10 rounded-full"
+/>
           </div>
           <div className="flex-1 min-w-0">
             {isEditing ? (
@@ -231,16 +273,31 @@ useEffect(() => {
             ) : (
               <>
                 <h2 className="text-lg font-semibold text-gray-900 truncate">{video.title}</h2>
-                <h5 className="text-lg font-semibold text-gray-900 truncate">{video.description}</h5>
-                <p className="text-sm text-gray-600 mt-1">{video.channel?.name}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {video.views?.toLocaleString() || "678K"} views • <Time date={video.createdAt} />
-                </p>
+                <p className="text-sm text-gray-600 mt-1">{video.description}</p>
+                <div className="flex items-center mt-2">
+                  <p className="text-sm text-gray-600">{video.owner?.username}</p>
+                  {video.owner && (
+                    <button
+                      onClick={handleSubscribe}
+                      className={`ml-2 px-2 py-1 text-xs rounded-full transition-colors ${
+                        isSubscribed 
+                          ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
+                          : 'bg-red-600 text-white hover:bg-red-700'
+                      }`}
+                    >
+                      {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                    </button>
+                  )}
+                </div>
+<p className="text-xs text-gray-500 mt-1">
+  {subscriberCount.toLocaleString()} subscribers • {video.views?.toLocaleString() || "0"} views • <Time date={video.createdAt} />
+</p>
               </>
             )}
           </div>
         </div>
 
+        {/* Like/Comment Section */}
         <div className="flex items-center justify-between mt-3 border-t pt-3">
           <button 
             onClick={handleLike}
@@ -284,88 +341,85 @@ useEffect(() => {
             </form>
             
             <div className="space-y-3 max-h-60 overflow-y-auto">
-  {comments.map(comment => (
-    <div key={comment._id} className="flex space-x-2 group">
-      <img 
-        src={comment.CommentBy?.avatar || 'https://via.placeholder.com/40'} 
-        alt="user" 
-        className="w-8 h-8 rounded-full"
-      />
-      <div className="flex-1">
-        {editingCommentId === comment._id ? (
-          <div className="mb-2">
-            <input
-              type="text"
-              value={editCommentText}
-              onChange={(e) => setEditCommentText(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
-              required
-            />
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => handleUpdateComment(comment._id)}
-                className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
-              >
-                Save
-              </button>
-              <button 
-                onClick={cancelEditingComment}
-                className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-gray-100 p-2 rounded-lg relative">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-sm">
-                  {comment.CommentBy?.username || 'Anonymous'}
-                </p>
-                <p className="text-sm">{comment.content}</p>
-              </div>
-              {comment.CommentBy === localStorage.getItem('userId') || (
-                <div className="flex items-center space-x-2">
-                  <div className="relative group">
-                    <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
-                      </svg>
-                    </button>
-                    <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg hidden group-hover:block z-10">
-                      <button
-                        onClick={() => startEditingComment(comment)}
-                        className="block w-full text-left px-4 py-2 text-xs text-blue-600 hover:bg-gray-100 hover:text-blue-800"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                    </div>
+              {comments.map(comment => (
+                <div key={comment._id} className="flex space-x-2 group">
+                  <img 
+                    src={comment.CommentBy?.avatar || 'https://via.placeholder.com/40'} 
+                    alt="user" 
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex-1">
+                    {editingCommentId === comment._id ? (
+                      <div className="mb-2">
+                        <input
+                          type="text"
+                          value={editCommentText}
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
+                          required
+                        />
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleUpdateComment(comment._id)}
+                            className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
+                          >
+                            Save
+                          </button>
+                          <button 
+                            onClick={cancelEditingComment}
+                            className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-100 p-2 rounded-lg relative">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-sm">
+                              {comment.CommentBy?.username || 'Anonymous'}
+                            </p>
+                            <p className="text-sm">{comment.content}</p>
+                          </div>
+                          {comment.CommentBy?._id === localStorage.getItem('userId') && (
+                            <div className="flex items-center space-x-2">
+                              <div className="relative group">
+                                <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                                  </svg>
+                                </button>
+                                <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg hidden group-hover:block z-10">
+                                  <button
+                                    onClick={() => startEditingComment(comment)}
+                                    className="block w-full text-left px-4 py-2 text-xs text-blue-600 hover:bg-gray-100 hover:text-blue-800"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteComment(comment._id)}
+                                    className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 hover:text-red-800"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          <Time date={comment.createdAt} />
+                        </p>
+                      </div>
+                    )}
                   </div>
-             
                 </div>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-center text-gray-500 text-sm py-2">No comments yet</p>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              <Time date={comment.createdAt} />
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  ))}
-  {comments.length === 0 && (
-    <p className="text-center text-gray-500 text-sm py-2">No comments yet</p>
-  )}
-</div>
-            
-
           </div>
         )}
 

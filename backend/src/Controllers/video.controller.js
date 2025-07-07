@@ -87,6 +87,7 @@ if(userId){
 }
 
 const videos= await Video.find(filter)
+     .populate("owner", "_id username avatar")
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .sort({ createdAt: -1 });
@@ -110,13 +111,17 @@ const videos= await Video.find(filter)
 })
 
 const getSingleVideo = asynchandler(async (req, res) => {
-    const {videoId} = req.params;
-    const video = await Video.findById(videoId);
-    if (!video) {
-        throw new ApiError(404, "Video not found");
-    }
-    res.status(200).json(new ApiResponse("Video fetched successfully", video));
-})
+  const { videoId } = req.params;
+
+  const video = await Video.findById(videoId)
+    .populate("owner", "_id username avatar"); // <-- this line is added
+
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  res.status(200).json(new ApiResponse("Video fetched successfully", video));
+});
 
 
 const viewonvideo = asynchandler(async (req, res) => {

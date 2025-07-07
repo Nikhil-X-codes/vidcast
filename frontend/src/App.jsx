@@ -4,7 +4,6 @@ import { AuthProvider } from './context/Authcontext';
 import SignInPage from './pages/Signin';
 import LoginPage from './pages/Login';
 import Home from './pages/Home';
-import Subscription from './pages/Subscription';
 import History from './pages/History';
 import Sidebar from './components/Sidebar';
 import VideoManager from './pages/VideoManager';
@@ -12,6 +11,7 @@ import PlaylistManager from './components/PlaylistManager';
 import VideoList from './components/VideoList';
 import Like from './components/Like';
 import { ThemeProvider } from './context/Toggle';
+import SubscriptionStats from './components/SubscriptionStats';
 
 const App = () => {
   return (
@@ -41,7 +41,7 @@ const App = () => {
               <div className="flex">
                 <Sidebar />
                 <div className="flex-1">
-                  <Subscription />
+                  <SubscriptionStats />
                 </div>
               </div>
             }
@@ -81,6 +81,8 @@ const App = () => {
               </div>
             }
           />
+
+
           <Route
             path="/history"
             element={

@@ -108,7 +108,10 @@ const getplaylist = asynchandler(async (req, res) => {
         throw new ApiError(400, "Invalid playlist ID");
     }
 
-    const playlist = await Playlists.findById(playlistId);
+    const playlist = await Playlists.findById(playlistId).populate({
+        path: 'videos',
+        select: 'video title description thumbnail', // Include the fields you want from the Video model
+    });
 
     if (!playlist) {
         throw new ApiError(404, "Playlist not found");

@@ -21,7 +21,9 @@ const VideoCard = ({
   onDelete = () => {},
   onUpdate = () => {},
   onView = () => {},
-  readOnly = false 
+  readOnly = false,
+  hideInteractions = false,
+  showComments = true
 }) => {
   // State management
   const [isEditing, setIsEditing] = useState(false);
@@ -34,7 +36,7 @@ const VideoCard = ({
   const [likeCount, setLikeCount] = useState(video.likes || 0);
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
-  const [showComments, setShowComments] = useState(false);
+  const [commentsVisible, setCommentsVisible] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -72,48 +74,45 @@ const VideoCard = ({
       }
     };
 
-    if (showComments) {
+    if (commentsVisible) {
       fetchComments();
     }
-  }, [showComments, video._id]); 
+  }, [commentsVisible, video._id]); 
 
+  useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      try {
+        const response = await listSubscribersOfChannel(video.owner?._id);
+        const subscribers = response?.data?.subscribers || [];
 
-useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userId = user?._id;
 
-  const checkSubscriptionStatus = async () => {
+        const isSubbed = subscribers.some(sub => sub._id === userId);
+        setIsSubscribed(isSubbed);
+
+        setSubscriberCount(subscribers.length);
+
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+      }
+    };
+
+    if (video.owner?._id) {
+      checkSubscriptionStatus();
+    }
+  }, [video.owner?._id]);
+
+  const handleSubscribe = async () => {
     try {
-      const response = await listSubscribersOfChannel(video.owner?._id);
-      const subscribers = response?.data?.subscribers || [];
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      const userId = user?._id;
-
-      const isSubbed = subscribers.some(sub => sub._id === userId);
-      setIsSubscribed(isSubbed);
-
-      setSubscriberCount(subscribers.length);
-
-    } catch (error) {
-      console.error("Error checking subscription:", error);
+      const response = await listSubscribersOfChannel(video.owner._id);
+      if (response.success) {
+        setIsSubscribed(prev => !prev);
+      }
+    } catch (err) {
+      console.error("Failed to subscribe:", err);
     }
   };
-
-  if (video.owner?._id) {
-    checkSubscriptionStatus();
-  }
-}, [video.owner?._id]);
-
-
-const handleSubscribe = async () => {
-  try {
-    const response = await listSubscribersOfChannel(video.owner._id);
-    if (response.success) {
-      setIsSubscribed(prev => !prev);
-    }
-  } catch (err) {
-    console.error("Failed to subscribe:", err);
-  }
-};
 
   const handleLike = async () => {
     try {
@@ -250,11 +249,11 @@ const handleSubscribe = async () => {
       <div className="p-4">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-         <img 
-  src={video.owner?.avatar}  //
-  alt="channel" 
-  className="w-10 h-10 rounded-full"
-/>
+            <img 
+              src={video.owner?.avatar} 
+              alt="channel" 
+              className="w-10 h-10 rounded-full"
+            />
           </div>
           <div className="flex-1 min-w-0">
             {isEditing ? (
@@ -289,39 +288,41 @@ const handleSubscribe = async () => {
                     </button>
                   )}
                 </div>
-<p className="text-xs text-gray-500 mt-1">
-  {subscriberCount.toLocaleString()} subscribers • {video.views?.toLocaleString() || "0"} views • <Time date={video.createdAt} />
-</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {subscriberCount.toLocaleString()} subscribers • {video.views?.toLocaleString() || "0"} views • <Time date={video.createdAt} />
+                </p>
               </>
             )}
           </div>
         </div>
 
-        {/* Like/Comment Section */}
-        <div className="flex items-center justify-between mt-3 border-t pt-3">
-          <button 
-            onClick={handleLike}
-            className={`flex items-center space-x-1 ${liked ? 'text-red-600' : 'text-gray-600'} hover:text-red-600`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span>{Number(likeCount).toLocaleString()} Likes</span>
-          </button>
-          
-          <button 
-            onClick={() => setShowComments(!showComments)}
-            className="flex items-center space-x-1 text-gray-600 hover:text-blue-600"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span>{comments.length}</span>
-          </button>
-        </div>
+        {/* Like/Comment Section - Only show if hideInteractions is false */}
+        {!hideInteractions && (
+          <div className="flex items-center justify-between mt-3 border-t pt-3">
+            <button 
+              onClick={handleLike}
+              className={`flex items-center space-x-1 ${liked ? 'text-red-600' : 'text-gray-600'} hover:text-red-600`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={liked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span>{Number(likeCount).toLocaleString()} Likes</span>
+            </button>
+            
+            <button 
+              onClick={() => setCommentsVisible(!commentsVisible)}
+              className="flex items-center space-x-1 text-gray-600 hover:text-blue-600"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span>{comments.length}</span>
+            </button>
+          </div>
+        )}
 
-        {/* Comment Section */}
-        {showComments && (
+        {/* Comment Section - Only show if showComments is true and commentsVisible is true */}
+        {showComments && commentsVisible && (
           <div className="mt-3 border-t pt-3">
             <form onSubmit={handleCommentSubmit} className="flex space-x-2 mb-3">
               <input
@@ -382,7 +383,7 @@ const handleSubscribe = async () => {
                             </p>
                             <p className="text-sm">{comment.content}</p>
                           </div>
-                          {comment.CommentBy?._id === localStorage.getItem('userId') && (
+                          {comment.CommentBy?._id === localStorage.getItem('userId') || (
                             <div className="flex items-center space-x-2">
                               <div className="relative group">
                                 <button className="text-gray-600 hover:text-gray-800 focus:outline-none">

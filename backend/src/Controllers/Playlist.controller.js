@@ -82,6 +82,10 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
     const { playlistId, videoId } = req.params;
     const userId = req.user.id;
 
+    if( !mongoose.Types.ObjectId.isValid(playlistId) || !mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid playlist or video ID");
+    }
+
     const playlist = await Playlists.findOne({ 
         _id: playlistId,
         owner: userId

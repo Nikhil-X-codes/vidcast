@@ -12,6 +12,7 @@ import {
     fetchPlaylist
 } from '../services/playlist'
 
+
 const PlaylistManager = () => {
     const { playlistId } = useParams();
     const navigate = useNavigate();
@@ -122,19 +123,27 @@ const PlaylistManager = () => {
             setError(err.message || 'Failed to add video to playlist');
         }
     };
+    
+const handleRemoveVideo = async () => {
+    try {
 
-    const handleRemoveVideo = async (videoId) => {
-        try {
-            await removeVideoFromPlaylist(playlistId, videoId);
-            loadPlaylist();
-        } catch (err) {
-            setError(err.message || 'Failed to remove video from playlist');
+        const videoToRemove = playlist.videos[0]._id; 
+                
+        if (!videoToRemove) {
+            setError('No video found in playlist');
+            return;
         }
-    };
+        
+        await removeVideoFromPlaylist(playlistId, videoToRemove);
+        loadPlaylist();
+    } catch (err) {
+        setError(err.message || 'Failed to remove video from playlist');
+    }
+};
 
-    if (loading) return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600"></div>
+       if (loading) return (
+        <div className={`flex justify-center items-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+            <div className={`animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 ${theme === 'dark' ? 'border-purple-400' : 'border-purple-600'}`}></div>
         </div>
     );
 
@@ -347,7 +356,7 @@ const PlaylistManager = () => {
                             </h2>
                         </div>
                         <div className="p-6">
-               {playlist && playlist.videos && playlist.videos.length > 0 ? (
+{playlist?.videos?.length > 0 ? (
     <VideoList
         videos={playlist.videos}
         onRemove={handleRemoveVideo}
@@ -384,7 +393,7 @@ const PlaylistManager = () => {
                                         placeholder="Enter Video ID"
                                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
                                     />
-                                </div>
+                                </div> 
                                 <button
                                     onClick={handleAddVideo}
                                     className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg whitespace-nowrap"

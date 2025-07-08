@@ -342,81 +342,87 @@ const VideoCard = ({
             </form>
             
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {comments.map(comment => (
-                <div key={comment._id} className="flex space-x-2 group">
-                  <img 
-                    src={comment.CommentBy?.avatar || 'https://via.placeholder.com/40'} 
-                    alt="user" 
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div className="flex-1">
-                    {editingCommentId === comment._id ? (
-                      <div className="mb-2">
-                        <input
-                          type="text"
-                          value={editCommentText}
-                          onChange={(e) => setEditCommentText(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
-                          required
-                        />
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleUpdateComment(comment._id)}
-                            className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
-                          >
-                            Save
-                          </button>
-                          <button 
-                            onClick={cancelEditingComment}
-                            className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-100 p-2 rounded-lg relative">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium text-sm">
-                              {comment.CommentBy?.username || 'Anonymous'}
-                            </p>
-                            <p className="text-sm">{comment.content}</p>
-                          </div>
-                          {comment.CommentBy?._id === localStorage.getItem('userId') || (
-                            <div className="flex items-center space-x-2">
-                              <div className="relative group">
-                                <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
-                                  </svg>
-                                </button>
-                                <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg hidden group-hover:block z-10">
-                                  <button
-                                    onClick={() => startEditingComment(comment)}
-                                    className="block w-full text-left px-4 py-2 text-xs text-blue-600 hover:bg-gray-100 hover:text-blue-800"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteComment(comment._id)}
-                                    className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 hover:text-red-800"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          <Time date={comment.createdAt} />
-                        </p>
-                      </div>
-                    )}
+{comments
+  .filter(comment => comment._id) // Filter out comments without IDs
+  .map(comment => (
+    <div 
+      key={comment._id} 
+      className="flex space-x-2 group"
+    >
+      <img 
+        src={comment.CommentBy?.avatar || 'https://via.placeholder.com/40'} 
+        alt="user" 
+        className="w-8 h-8 rounded-full"
+      />
+      <div className="flex-1">
+        {editingCommentId === comment._id ? (
+          <div className="mb-2">
+            <input
+              type="text"
+              value={editCommentText}
+              onChange={(e) => setEditCommentText(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
+              required
+            />
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => handleUpdateComment(comment._id)}
+                className="bg-green-600 text-white px-2 py-1 text-sm rounded hover:bg-green-700"
+              >
+                Save
+              </button>
+              <button 
+                onClick={cancelEditingComment}
+                className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-100 p-2 rounded-lg relative">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-medium text-sm">
+                  {comment.CommentBy?.username || 'Anonymous'}
+                </p>
+                <p className="text-sm">{comment.content}</p>
+              </div>
+              {comment.CommentBy?._id === localStorage.getItem('userId') || (
+                <div className="flex items-center space-x-2">
+                  <div className="relative group">
+                    <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6h.01M12 12h.01M12 18h.01" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg hidden group-hover:block z-10">
+                      <button
+                        onClick={() => startEditingComment(comment)}
+                        className="block w-full text-left px-4 py-2 text-xs text-blue-600 hover:bg-gray-100 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              <Time date={comment.createdAt} />
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  ))
+}
               {comments.length === 0 && (
                 <p className="text-center text-gray-500 text-sm py-2">No comments yet</p>
               )}

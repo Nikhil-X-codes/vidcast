@@ -63,11 +63,14 @@ const addVideoToPlaylist = async (playlistId, videoId) => {
 
 const removeVideoFromPlaylist = async (playlistId, videoId) => {
     try {
-        const response = await axios.delete(`${API_URL}/playlists/${playlistId}/videos/${videoId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        const response = await axios.delete(
+            `${API_URL}/playlists/${playlistId}/videos/${videoId}`, 
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

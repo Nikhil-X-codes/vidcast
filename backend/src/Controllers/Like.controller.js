@@ -64,13 +64,27 @@ const getLikedVideos = asynchandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "videos", 
+        from: "videos",
         localField: "video",
         foreignField: "_id",
         as: "videoDetails",
       },
     },
     { $unwind: "$videoDetails" },
+    {
+      $lookup: {
+        from: "users", // Add this lookup to get owner details
+        localField: "videoDetails.owner",
+        foreignField: "_id",
+        as: "ownerDetails",
+      },
+    },
+    { $unwind: "$ownerDetails" },
+    {
+      $addFields: {
+        "videoDetails.owner": "$ownerDetails" // Replace owner ID with owner object
+      }
+    },
     {
       $replaceRoot: { newRoot: "$videoDetails" },
     },
@@ -83,10 +97,11 @@ const getLikedVideos = asynchandler(async (req, res) => {
 
   const likedVideos = await Likes.aggregatePaginate(aggregate, options);
 
- res.status(200).json(
-    new ApiResponse(200,"Liked videos retrieved successfully", likedVideos)
+  res.status(200).json(
+    new ApiResponse(200, "Liked videos retrieved successfully", likedVideos)
   );
 });
+
 
 const getLikeStatus = asynchandler(async (req, res) => {
   const { videoId } = req.params;

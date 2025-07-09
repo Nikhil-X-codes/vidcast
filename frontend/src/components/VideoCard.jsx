@@ -15,6 +15,7 @@ import {
   listSubscribedChannels,
   listSubscribersOfChannel
 } from '../services/subservice';
+import { useTheme } from '../context/Toggle';
 
 const VideoCard = ({
   video,
@@ -41,6 +42,7 @@ const VideoCard = ({
   const [editCommentText, setEditCommentText] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(0);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -189,11 +191,13 @@ const VideoCard = ({
   };
 
   return (
-    <div 
-      className="w-full max-w-sm bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+  <div 
+  className={`w-full max-w-sm rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl ${
+    theme === 'dark' ? 'bg-gray-400 text-white' : 'bg-white text-gray-700'
+  }`}
+  onMouseEnter={() => setIsHovered(true)}
+  onMouseLeave={() => setIsHovered(false)}
+>
       {/* Thumbnail/Video Section */}
       <div className="relative w-full h-48 bg-black cursor-pointer">
         {showVideo ? (
@@ -250,7 +254,7 @@ const VideoCard = ({
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
             <img 
-              src={video.owner?.avatar} 
+              src={video.owner.avatar} 
               alt="channel" 
               className="w-10 h-10 rounded-full"
             />
@@ -324,22 +328,31 @@ const VideoCard = ({
         {/* Comment Section - Only show if showComments is true and commentsVisible is true */}
         {showComments && commentsVisible && (
           <div className="mt-3 border-t pt-3">
-            <form onSubmit={handleCommentSubmit} className="flex space-x-2 mb-3">
-              <input
-                type="text"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
-              />
-              <button 
-                type="submit"
-                className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
-              >
-                Post
-              </button>
-            </form>
+
+          <form onSubmit={handleCommentSubmit} className="flex space-x-2 mb-3">
+  <input
+    type="text"
+    value={commentText}
+    onChange={(e) => setCommentText(e.target.value)}
+    placeholder="Add a comment..."
+    className={`flex-1 p-2 border rounded focus:outline-none focus:ring-1 ${
+      theme === 'dark' 
+        ? 'bg-gray-700 border-gray-600 focus:ring-blue-500 text-white placeholder-gray-400' 
+        : 'bg-white border-gray-300 focus:ring-blue-500 text-gray-800 placeholder-gray-500'
+    }`}
+    required
+  />
+  <button 
+    type="submit"
+    className={`px-3 py-1 rounded-md transition ${
+      theme === 'dark'
+        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+        : 'bg-blue-600 hover:bg-blue-700 text-white'
+    }`}
+  >
+    Post
+  </button>
+</form>
             
             <div className="space-y-3 max-h-60 overflow-y-auto">
 {comments
@@ -357,13 +370,17 @@ const VideoCard = ({
       <div className="flex-1">
         {editingCommentId === comment._id ? (
           <div className="mb-2">
-            <input
-              type="text"
-              value={editCommentText}
-              onChange={(e) => setEditCommentText(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mb-1"
-              required
-            />
+       <input
+  type="text"
+  value={editCommentText}
+  onChange={(e) => setEditCommentText(e.target.value)}
+  className={`w-full p-2 border rounded focus:outline-none focus:ring-1 mb-1 ${
+    theme === 'dark'
+      ? 'bg-gray-700 border-gray-600 focus:ring-blue-500 text-white'
+      : 'bg-white border-gray-300 focus:ring-blue-500 text-gray-800'
+  }`}
+  required
+/>
             <div className="flex space-x-2">
               <button 
                 onClick={() => handleUpdateComment(comment._id)}
@@ -380,14 +397,18 @@ const VideoCard = ({
             </div>
           </div>
         ) : (
-          <div className="bg-gray-100 p-2 rounded-lg relative">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-sm">
-                  {comment.CommentBy?.username || 'Anonymous'}
-                </p>
-                <p className="text-sm">{comment.content}</p>
-              </div>
+<div className={`p-2 rounded-lg relative ${
+  theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-800'
+}`}>
+  <div className="flex justify-between items-start">
+    <div>
+      <p className={`font-medium text-sm ${
+        theme === 'dark' ? 'text-white' : 'text-gray-900'
+      }`}>
+        {comment.CommentBy?.username || 'Anonymous'}
+      </p>
+      <p className="text-sm">{comment.content}</p>
+    </div>
               {comment.CommentBy?._id === localStorage.getItem('userId') || (
                 <div className="flex items-center space-x-2">
                   <div className="relative group">
@@ -414,9 +435,11 @@ const VideoCard = ({
                 </div>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              <Time date={comment.createdAt} />
-            </p>
+            <p className={`text-xs mt-1 ${
+    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+  }`}>
+    <Time date={comment.createdAt} />
+  </p>
           </div>
         )}
       </div>

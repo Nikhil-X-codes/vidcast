@@ -60,8 +60,9 @@ const History = () => {
               <div key={video._id} className={`rounded-xl overflow-hidden ${cardBg} ${borderColor} border`}>
                 <VideoCard 
                   video={video} 
-                  hideInteractions={true}  // This will hide like/comment buttons
-                  showComments={false}     // This will hide comments section
+                  hideInteractions={true}  
+                  showComments={false} 
+                   hideActions={true} 
                 />
               </div>
             ))}

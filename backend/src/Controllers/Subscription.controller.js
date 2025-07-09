@@ -43,13 +43,15 @@ const listSubscribedChannels = asynchandler(async (req, res) => {
 
     const channels = subscriptions.map((sub) => sub.channel);
 
-      return res.status(200).json(new ApiResponse(
+    return res.status(200).json(new ApiResponse(
         200,
         "Subscribed channels retrieved successfully",
         {
-        count: channels.length,
-        channels: channels,
-    }, true));
+            count: channels.length,
+            channels: channels,
+        }, 
+        true
+    ));
 });
 
 const listSubscribersOfChannel = asynchandler(async (req, res, next) => {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000/api/v1'; 
+const API_BASE = import.meta.env.VITE_BASE_URL ; 
 
 export const fetchVideos = (limit = 10) =>
   axios.get(`${API_BASE}/videos/all?limit=${limit}`, {

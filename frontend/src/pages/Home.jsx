@@ -59,12 +59,12 @@ const Home = () => {
   const dropdownBorder = theme === 'dark' ? 'border-gray-700' : 'border-gray-300';
 
   const searchBg = theme === 'dark'
-    ? 'bg-gray-800/70 backdrop-blur'
-    : 'bg-white/60 backdrop-blur';
+    ? 'bg-gray-1000/70 backdrop-blur'
+    : 'bg-white/90 backdrop-blur';
 
   const searchBorder = theme === 'dark' ? 'border-gray-600' : 'border-gray-300';
 
-  const searchFocus = 'focus:ring-pink-500 focus:border-pink-500';
+  const searchFocus = 'focus:ring-pink-600 focus:border-pink-600';
 
   return (
     <div

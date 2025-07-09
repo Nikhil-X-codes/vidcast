@@ -14,8 +14,10 @@ import {
   faLock, 
   faSave,
   faUpload,
-  faCheckCircle
+  faCheckCircle,
+  faEye, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
+
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -23,6 +25,9 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Image upload state
   const [avatarFile, setAvatarFile] = useState(null);
@@ -312,54 +317,81 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-          <FontAwesomeIcon icon={faLock} className="mr-2 text-blue-500" />
-          Change Password
-        </h2>
-        <form onSubmit={handlePasswordChange}>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2 font-medium">Current Password</label>
-            <input
-              type="password"
-              name="currentPassword"
-              value={passwordData.currentPassword}
-              onChange={handlePasswordChangeInput}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2 font-medium">New Password</label>
-            <input
-              type="password"
-              name="newPassword"
-              value={passwordData.newPassword}
-              onChange={handlePasswordChangeInput}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 mb-2 font-medium">Confirm New Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={passwordData.confirmPassword}
-              onChange={handlePasswordChangeInput}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              required
-            />
-          </div>
-          <button 
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center"
-          >
-            <FontAwesomeIcon icon={faLock} className="mr-2" />
-            Change Password
-          </button>
-        </form>
+<div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+  <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+    <FontAwesomeIcon icon={faLock} className="mr-2 text-blue-500" />
+    Change Password
+  </h2>
+  <form onSubmit={handlePasswordChange}>
+    <div className="mb-4 relative">
+      <label className="block text-gray-700 mb-2 font-medium">Current Password</label>
+      <div className="relative">
+        <input
+          type={showCurrentPassword ? "text" : "password"}
+          name="currentPassword"
+          value={passwordData.currentPassword}
+          onChange={handlePasswordChangeInput}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12"
+          required
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+        >
+          <FontAwesomeIcon icon={showCurrentPassword ? faEye : faEyeSlash} />
+        </button>
       </div>
+    </div>
+    <div className="mb-4 relative">
+      <label className="block text-gray-700 mb-2 font-medium">New Password</label>
+      <div className="relative">
+        <input
+          type={showNewPassword ? "text" : "password"}
+          name="newPassword"
+          value={passwordData.newPassword}
+          onChange={handlePasswordChangeInput}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12"
+          required
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+          onClick={() => setShowNewPassword(!showNewPassword)}
+        >
+          <FontAwesomeIcon icon={showNewPassword ? faEye : faEyeSlash} />
+        </button>
+      </div>
+    </div>
+    <div className="mb-6 relative">
+      <label className="block text-gray-700 mb-2 font-medium">Confirm New Password</label>
+      <div className="relative">
+        <input
+          type={showConfirmPassword ? "text" : "password"}
+          name="confirmPassword"
+          value={passwordData.confirmPassword}
+          onChange={handlePasswordChangeInput}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12"
+          required
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          <FontAwesomeIcon icon={showConfirmPassword ? faEye : faEyeSlash} />
+        </button>
+      </div>
+    </div>
+    <button 
+      type="submit"
+      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center"
+    >
+      <FontAwesomeIcon icon={faLock} className="mr-2" />
+      Change Password
+    </button>
+  </form>
+</div>
     </div>
   );
 };

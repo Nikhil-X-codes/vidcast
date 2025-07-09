@@ -35,6 +35,7 @@ Routes are created using **HTTP methods** like:
 - `PATCH` – Update partial data
 - `DELETE` – Remove data
 
+
 ### 🧾 Sample Code
 
 ```js

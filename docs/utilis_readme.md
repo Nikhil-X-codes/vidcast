@@ -37,9 +37,7 @@ A wrapper function to simplify error handling in `async/await` routes, removing 
 
 Handles file uploads to Cloudinary. If the file is missing or the upload fails, it automatically deletes the local file to prevent storage issues.
 
-### `sendMail.js`
 
-Uses **Nodemailer** to send emails (e.g. for password reset) and also Manages email configuration
 
 
 

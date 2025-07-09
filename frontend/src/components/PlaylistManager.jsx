@@ -81,9 +81,16 @@ const PlaylistManager = () => {
     }, []);
 
     useEffect(() => {
-        const loadInitialData = async () => {
-            try {
-                setLoading(true);
+    const loadInitialData = async () => {
+        try {
+            setLoading(true);
+            
+            // First get user data
+            const userData = JSON.parse(localStorage.getItem('user'));
+            if (userData && userData._id) {
+                setUserId(userData._id);
+                
+                // If we have a playlistId, fetch that specific playlist
                 if (playlistId) {
                     const playlistResponse = await fetchPlaylist(playlistId);
                     setPlaylist(playlistResponse.data);
@@ -91,20 +98,22 @@ const PlaylistManager = () => {
                         name: playlistResponse.data.name,
                         description: playlistResponse.data.description
                     });
-                }
-                if (userId) { 
-                    const playlistsResponse = await fetchAllPlaylists(userId);
+                } 
+                // Only fetch all playlists when we're at the root playlist route
+                else {
+                    const playlistsResponse = await fetchAllPlaylists(userData._id);
                     setAllPlaylists(playlistsResponse.data);
                     localStorage.setItem('userPlaylists', JSON.stringify(playlistsResponse.data));
                 }
-            } catch (err) {
-              console.error('Error loading initial data:', err);
-            } finally {
-                setLoading(false);
             }
-        };
-        loadInitialData();
-    }, [playlistId, userId]);
+        } catch (err) {
+            console.error('Error loading initial data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    loadInitialData();
+}, [playlistId]); // Remove userId from dependencies
 
     const loadPlaylist = async () => {
         try {
@@ -115,7 +124,6 @@ const PlaylistManager = () => {
                 name: response.data.name,
                 description: response.data.description
             });
-            setError('');
         } catch (err) {
           console.log('Error loading playlist:', err);
         } finally {
@@ -129,7 +137,7 @@ const PlaylistManager = () => {
             const response = await createPlaylist(formData.name, formData.description);
             const updatedPlaylists = [...allPlaylists, response.data];
             setAllPlaylists(updatedPlaylists);
-            localStorage.setItem('userPlaylists', JSON.stringify(updatedPlaylists));
+            // localStorage.setItem('userPlaylists', JSON.stringify(updatedPlaylists));
             navigate(`/playlist/${response.data._id}`);
         } catch (err) {
            console.error('Error creating playlist:', err);
@@ -152,7 +160,8 @@ const PlaylistManager = () => {
             await deletePlaylist(playlistId);
             const updatedPlaylists = allPlaylists.filter(p => p._id !== playlistId);
             setAllPlaylists(updatedPlaylists);
-            localStorage.setItem('userPlaylists', JSON.stringify(updatedPlaylists));
+            // localStorage.setItem('userPlaylists', JSON.stringify(updatedPlaylists));
+            navigate('/playlist');
         } catch (err) {
             console.error('Error deleting playlist:', err);
         }

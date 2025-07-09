@@ -1,4 +1,4 @@
-# 🎥 VidCast                                                                 (I'm working on its Frontend)
+# 🎥 VidCast                                                              
 VidCast is a dynamic video streaming platform similar to YouTube. Users can register, log in, search videos, manage personal playlists, view history, and subscribe to their favorite creators.
 
 ---
@@ -24,7 +24,8 @@ VidCast is a dynamic video streaming platform similar to YouTube. Users can regi
 | `jsonwebtoken`  | JWT-based user authentication         |
 | `mongoose`      | ODM for MongoDB                       |
 | `multer`        | Middleware for file uploads           |
-                  
+| 'axios'         | Conencts frontend and backend         |
+
 
 ### 🔧 **devDependencies (For development only)**
 | Package     | Description                            |

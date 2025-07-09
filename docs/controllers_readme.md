@@ -33,8 +33,8 @@ Registers a new user.
 
 **Required Fields**:
 - `email`
-- `username`
-- `password` (minimum 8 characters)
+- `username`  (always in small letter)
+- `password` 
 - `avatar` (image)
 - `coverImage` (image)
 
@@ -99,7 +99,6 @@ Fetches user data based on their MongoDB `_id`.
 **Description**:  
 Users can update the following fields:
 - `username`
-- `email`
 
 > In production systems, image uploads are typically handled by dedicated controllers or services.
 
@@ -162,10 +161,8 @@ Fetches a video’s complete details using its `videoId`.
 ## ❤️ Like Functionality
 
 - **Like a video**  
-  Allows a user to like a specific video.
+  Allows a user to like a specific video
 
-- **Like a comment**  
-  Allows a user to like a specific comment.
 
 - **Get all liked videos**  
   Retrieves all videos liked by the current user.
@@ -205,6 +202,9 @@ Fetches a video’s complete details using its `videoId`.
 - **Get a playlist**  
   Fetches all videos and details of a given playlist.
 
+- **Get a playlist**  
+  Fetches all playlists.
+
 ---
 
 ## 🔔 Subscription Functionality
@@ -212,16 +212,10 @@ Fetches a video’s complete details using its `videoId`.
 - **Toggle the subscribe button**  
   Subscribes the user to a channel if not already subscribed, or unsubscribes if already subscribed.
 
-- **Get number of channels subscribed by current user**  
+- **Get number of channels subscribed by user**  
   Returns the total number of channels the current user is subscribed to.
 
 - **Get number of subscribers of a channel**  
   Returns the total number of subscribers for a specific channel.
 
-
-## 🧩 Developer Notelist
-
-In production-grade systems:
-- Controller logic is often separated into **service layers**.
-- This improves **scalability**, **testability**, and **maintainability**.
 

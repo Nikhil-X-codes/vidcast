@@ -74,14 +74,15 @@ const VideoManager = () => {
       await loadVideos();
     } catch (err) {
       console.error('Update failed:', err);
-      alert('Failed to update video');
     }
   };
 
   const handleView = async (id) => {
     try {
-      await getview(id);
+    const response = await getview(id);
+    if (response.status === 200) {  // Check if the request was successful
       await loadVideos();
+    }
     } catch (err) {
       console.error('View tracking failed:', err);
     }

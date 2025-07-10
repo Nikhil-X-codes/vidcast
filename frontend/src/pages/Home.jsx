@@ -32,7 +32,6 @@ const Home = () => {
   const goToProfile = () => {
     navigate('profile');
     setDropdownOpen(false);
-    console.log(user?.avatar);
   };
 
   const handleSearch = (e) => {

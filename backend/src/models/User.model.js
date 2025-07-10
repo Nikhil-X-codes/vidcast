@@ -20,18 +20,13 @@ const userSchema = new Schema({
     trim: true,
     lowercase: true
   },
-  fullname: {
-    type: String,
-    required: true,
-    trim: true,
-    index: true
-  },
   avatar: {
     type: String,
-    required: true // Cloudinary URL
+    required: true 
   },
-  coverImage: {
-    type: String // Cloudinary URL
+  coverimage: {
+    type: String,
+    required: true
   },
   password: {
     type: String,
@@ -46,7 +41,7 @@ const userSchema = new Schema({
   resetPasswordExpire: {
     type: Date
   },
-  watchHistory: [{
+  watchhistory: [{
     type: Schema.Types.ObjectId,
     ref: "Video"
   }],

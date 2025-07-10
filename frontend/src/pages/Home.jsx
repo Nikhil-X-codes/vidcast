@@ -114,12 +114,12 @@ const Home = () => {
           </button>
 
           <div ref={dropdownRef} className="relative">
-            <img
-              src={user?.avatar || 'https://ui-avatars.com/api/?name=User&background=random'}
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full cursor-pointer object-cover ring-2 ring-pink-400 hover:ring-pink-500 transition-all shadow-lg"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            />
+<img
+  src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username?.charAt(0) || 'U'}&background=random`}
+  alt="User Avatar"
+  className="w-10 h-10 rounded-full cursor-pointer object-cover ring-2 ring-pink-400 hover:ring-pink-500 transition-all shadow-lg"
+  onClick={() => setDropdownOpen(!dropdownOpen)}
+/>
             {dropdownOpen && (
               <div className={`absolute right-0 mt-2 w-48 ${dropdownBg} border ${dropdownBorder} rounded-md shadow-xl z-50 overflow-hidden`}>
                 <button

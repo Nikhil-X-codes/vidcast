@@ -24,7 +24,6 @@ const VideoManager = () => {
       setVideos(res.data.message.videos || []);
     } catch (err) {
       console.error('Failed to fetch videos:', err);
-      alert('Failed to load videos');
     }
   };
 

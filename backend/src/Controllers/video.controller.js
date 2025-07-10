@@ -71,27 +71,37 @@ const videoupdating = asynchandler(async (req, res) => {
 
 
 const getAllVideos = asynchandler(async (req, res) => {                           
-    const {page = 1, limit = 10,search, userId } = req.query;
-
+   
+  const { page = 1, limit = 10, search, userId } = req.query;
+    
+    // Get the logged-in user's ID from the request (from auth middleware)
+    const loggedInUserId = req.user?._id;
+    
     const filter = {};
 
-  if (search) {
-  filter.$or = [
-    { title: { $regex: search, $options: "i" } }, 
-    { description: { $regex: search, $options: "i" } }
-  ];
-}
+    // If no userId is specified in query, show only logged-in user's videos
+    if (!userId && loggedInUserId) {
+        filter.owner = loggedInUserId; // or filter.userId if your schema is different
+    }
+    // If userId is specified, use that (for viewing specific user's videos)
+    else if (userId) {
+        filter.owner = userId;
+    }
 
-if(userId){
-    filter.userId = userId; 
-}
+    if (search) {
+        filter.$or = [
+            { title: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } }
+        ];
+    }
 
-const videos= await Video.find(filter)
-     .populate("owner", "_id username avatar")
-    .skip((page - 1) * limit)
-    .limit(Number(limit))
-    .sort({ createdAt: -1 });
+    const videos = await Video.find(filter)
+        .populate("owner", "_id username avatar")
+        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .sort({ createdAt: -1 });
 
+    
     const totalVideos = await Video.countDocuments(filter);
 
     if(totalVideos === 0) {

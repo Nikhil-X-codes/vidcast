@@ -6,55 +6,57 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your-access-secr
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret';
 
 const userSchema = new Schema({
-  watchhistory: [{
-    type: Schema.Types.ObjectId,
-    ref: "Video",
-    default: []
-  }],
   username: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
+    index: true
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    index: true
+    trim: true,
+    lowercase: true
   },
   fullname: {
     type: String,
-    trim: true
+    required: true,
+    trim: true,
+    index: true
   },
   avatar: {
     type: String,
-    required: true,
+    required: true // Cloudinary URL
   },
-  coverimage: {
-    type: String,
-    required: true,
+  coverImage: {
+    type: String // Cloudinary URL
   },
   password: {
     type: String,
-    required: true
+    required: [true, 'Password is required']
   },
   refreshToken: {
     type: String
   },
   resetPasswordToken: {
-  type: String
-},
-resetPasswordExpire: {
-  type: Date
-},
-watchHistory: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Video"
-            }
-        ],
-}, { timestamps: true });
-
+    type: String
+  },
+  resetPasswordExpire: {
+    type: Date
+  },
+  watchHistory: [{
+    type: Schema.Types.ObjectId,
+    ref: "Video"
+  }],
+  videos: [{
+    type: Schema.Types.ObjectId,
+    ref: "Video"
+  }]
+}, {
+  timestamps: true
+});
 
 userSchema.pre("save",async function(next){                                      
                                                                        

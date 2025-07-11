@@ -322,7 +322,7 @@ const VideoManager = () => {
       </div>
 
       {/* Global styles for animations */}
-      <style jsx global>{`
+      <style>{`
         @keyframes float {
           0% { transform: translateY(0) rotate(0deg); opacity: 1; }
           100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }

@@ -24,7 +24,7 @@ const VideoCard = ({
   onView = () => {},
   readOnly = false,
   hideInteractions = false,
-  showComments = true
+  showComments = true,
 }) => {
   // State management
   const [isEditing, setIsEditing] = useState(false);

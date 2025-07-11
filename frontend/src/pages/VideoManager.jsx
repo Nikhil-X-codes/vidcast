@@ -18,14 +18,18 @@ const VideoManager = () => {
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
 
-  const loadVideos = async () => {
-    try {
-      const res = await fetchVideos();
-      setVideos(res.data.message.videos || []);
-    } catch (err) {
-      console.error('Failed to fetch videos:', err);
+const loadVideos = async (options = {}) => {
+  try {
+    const res = await fetchVideos();
+    setVideos(res.data.message.videos || []);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      setVideos([]); 
+    } else {
+      console.error("Failed to fetch videos:", err);
     }
-  };
+  }
+};
 
   useEffect(() => {
     loadVideos();
@@ -80,7 +84,7 @@ const VideoManager = () => {
   const handleView = async (id) => {
     try {
     const response = await getview(id);
-    if (response.status === 200) {  // Check if the request was successful
+    if (response.status === 200) {  
       await loadVideos();
     }
     } catch (err) {
@@ -88,7 +92,6 @@ const VideoManager = () => {
     }
   };
 
-  // Theme styles
   const bgColor = theme === 'dark'
     ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900'
     : 'bg-gradient-to-br from-gray-50 to-gray-100';

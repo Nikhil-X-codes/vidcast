@@ -2,11 +2,10 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_BASE_URL ; 
 
-export const fetchVideos = (limit = 10) =>
-  axios.get(`${API_BASE}/videos/all?limit=${limit}`, {
+export const fetchVideos = () =>
+  axios.get(`${API_BASE}/videos/all`, {
     withCredentials: true,
   });
-
 
 export const uploadVideo = (formData) =>
   axios.post(`${API_BASE}/videos/upload`, formData, {
@@ -14,6 +13,10 @@ export const uploadVideo = (formData) =>
     withCredentials: true,
   });
 
+export const fetchsearchVideos = (search) =>
+  axios.get(`${API_BASE}/videos/result?search=${search}`, {
+    withCredentials: true,
+  });
 
 export const deleteVideo = (videoId) =>
   axios.delete(`${API_BASE}/videos/delete/${videoId}`, {

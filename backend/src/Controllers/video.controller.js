@@ -70,30 +70,18 @@ const videoupdating = asynchandler(async (req, res) => {
 });
 
 
-const getAllVideos = asynchandler(async (req, res) => {                           
-   
-  const { page = 1, limit = 10, search, userId } = req.query;
-    
-    // Get the logged-in user's ID from the request (from auth middleware)
+const getAllVideos = asynchandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+
     const loggedInUserId = req.user?._id;
-    
-    const filter = {};
 
-    // If no userId is specified in query, show only logged-in user's videos
-    if (!userId && loggedInUserId) {
-        filter.owner = loggedInUserId; // or filter.userId if your schema is different
-    }
-    // If userId is specified, use that (for viewing specific user's videos)
-    else if (userId) {
-        filter.owner = userId;
+    if (!loggedInUserId) {
+        return res.status(401).json({ message: "Unauthorized: Login required to view your videos" });
     }
 
-    if (search) {
-        filter.$or = [
-            { title: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } }
-        ];
-    }
+    const filter = {
+        owner: loggedInUserId
+    };
 
     const videos = await Video.find(filter)
         .populate("owner", "_id username avatar")
@@ -101,24 +89,61 @@ const getAllVideos = asynchandler(async (req, res) => {
         .limit(Number(limit))
         .sort({ createdAt: -1 });
 
-    
     const totalVideos = await Video.countDocuments(filter);
 
-    if(totalVideos === 0) {
+    if (totalVideos === 0) {
         throw new ApiError(404, "No videos found");
     }
- 
+
     res.status(200).json(new ApiResponse("Videos fetched successfully", {
         videos,
-         pagination: {
-                    totalVideos,
-                    limit: parseInt(limit),
-                    totalPages: Math.ceil(totalVideos / limit),
-                    currentPage: parseInt(page),
-                },
+        pagination: {
+            totalVideos,
+            limit: parseInt(limit),
+            totalPages: Math.ceil(totalVideos / limit),
+            currentPage: parseInt(page),
+        },
     }));
+});
 
-})
+const getVideosOnSearch = asynchandler(async (req, res) => {
+  const { search, page = 1, limit = 10 } = req.query;
+
+  if (!search || search.trim() === "") {
+    return res.status(400).json({ message: "Search query is required" });
+  }
+
+  const searchRegex = new RegExp(search, "i");
+
+  const filter = {
+    $or: [
+      { title: { $regex: searchRegex } },
+      { description: { $regex: searchRegex } },
+    ]
+  };
+
+  const videos = await Video.find(filter)
+    .populate("owner", "_id username avatar")
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
+    .sort({ createdAt: -1 });
+
+  const totalVideos = await Video.countDocuments(filter);
+
+  if (totalVideos === 0) {
+    throw new ApiError(404, "No videos found matching your search");
+  }
+
+  res.status(200).json(new ApiResponse("Videos fetched successfully", {
+    videos,
+    pagination: {
+      totalVideos,
+      limit: parseInt(limit),
+      totalPages: Math.ceil(totalVideos / limit),
+      currentPage: parseInt(page),
+    },
+  }));
+});
 
 const getSingleVideo = asynchandler(async (req, res) => {
   const { videoId } = req.params;
@@ -159,4 +184,4 @@ const viewonvideo = asynchandler(async (req, res) => {
 
 
 
-export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo,viewonvideo};
+export {videouploading,videodeleting,videoupdating,getAllVideos,getSingleVideo,viewonvideo,getVideosOnSearch};

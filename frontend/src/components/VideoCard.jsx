@@ -82,39 +82,45 @@ const VideoCard = ({
   }, [commentsVisible, video._id]); 
 
   useEffect(() => {
-    const checkSubscriptionStatus = async () => {
-      try {
-        const response = await listSubscribersOfChannel(video.owner?._id);
-        const subscribers = response?.data?.subscribers || [];
-
-        const user = JSON.parse(localStorage.getItem("user"));
-        const userId = user?._id;
-
-        const isSubbed = subscribers.some(sub => sub._id === userId);
-        setIsSubscribed(isSubbed);
-
-        setSubscriberCount(subscribers.length);
-
-      } catch (error) {
-        console.error("Error checking subscription:", error);
-      }
-    };
-
-    if (video.owner?._id) {
-      checkSubscriptionStatus();
-    }
-  }, [video.owner?._id]);
-
-  const handleSubscribe = async () => {
+  const checkSubscriptionStatus = async () => {
     try {
-      const response = await listSubscribersOfChannel(video.owner._id);
-      if (response.success) {
-        setIsSubscribed(prev => !prev);
-      }
-    } catch (err) {
-      console.error("Failed to subscribe:", err);
+      const response = await listSubscribersOfChannel(video.owner?._id);
+      const subscribers = response?.data?.subscribers || [];
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?._id;
+
+      const isSubbed = subscribers.some(sub => sub._id === userId);
+      setIsSubscribed(isSubbed);
+
+      setSubscriberCount(subscribers.length);
+
+    } catch (error) {
+      console.error("Error checking subscription:", error);
     }
   };
+
+  if (video.owner?._id) {
+    checkSubscriptionStatus();
+  }
+}, [video.owner?._id, isSubscribed]);
+
+const handleSubscribe = async () => {
+  try {
+    const response = await togglebtn(video.owner._id); // Actually call the toggle function
+    if (response.success) {
+      setIsSubscribed(prev => !prev); // Toggle the local state
+      // Update subscriber count
+      if (response.data.subscribed) {
+        setSubscriberCount(prev => prev + 1);
+      } else {
+        setSubscriberCount(prev => Math.max(0, prev - 1));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to toggle subscription:", err);
+  }
+};
 
   const handleLike = async () => {
     try {
@@ -280,16 +286,17 @@ const VideoCard = ({
                 <div className="flex items-center mt-2">
                   <p className="text-sm text-gray-600">{video.owner?.username}</p>
                   {video.owner && (
-                    <button
-                      onClick={handleSubscribe}
-                      className={`ml-2 px-2 py-1 text-xs rounded-full transition-colors ${
-                        isSubscribed 
-                          ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
-                          : 'bg-red-600 text-white hover:bg-red-700'
-                      }`}
-                    >
-                      {isSubscribed ? 'Subscribed' : 'Subscribe'}
-                    </button>
+              <button
+  onClick={handleSubscribe}
+  className={`ml-2 px-2 py-1 text-xs rounded-full transition-colors ${
+    isSubscribed 
+      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
+      : 'bg-red-600 text-white hover:bg-red-700'
+  }`}
+  disabled={!video.owner} 
+>
+  {isSubscribed ? 'Subscribed' : 'Subscribe'}
+</button>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">

@@ -58,7 +58,8 @@ Authenticates users via email and password.
 ## 3. 🚪 Logout
 
 **Description**:  
-Clears tokens from cookies to log the user out.
+Clears tokens from cookies to log the user out.it automatically Logout after 20-30 min.
+
 
 **Process**:
 - Token verification via middleware
@@ -161,7 +162,7 @@ Fetches a video’s complete details using its `videoId`.
 ## ❤️ Like Functionality
 
 - **Like a video**  
-  Allows a user to like a specific video
+  Allows a user to like a specific video but like count shows only when user hit like.
 
 
 - **Get all liked videos**  
@@ -172,7 +173,7 @@ Fetches a video’s complete details using its `videoId`.
 ## 💬 Comment Functionality
 
 - **Add comment**  
-  Adds a comment to a specified video.
+  Adds a comment to a specified video but comment count shows only when user comments.
 
 - **Delete comment**  
   Deletes a comment made by the user.
@@ -191,7 +192,7 @@ Fetches a video’s complete details using its `videoId`.
   Deletes an existing playlist created by the user.
 
 - **Update playlist**  
-  Modifies the name or metadata of a playlist.
+  Modifies the name and description of a playlist.
 
 - **Add video to playlist**  
   Adds a video to a selected playlist.
@@ -210,7 +211,7 @@ Fetches a video’s complete details using its `videoId`.
 ## 🔔 Subscription Functionality
 
 - **Toggle the subscribe button**  
-  Subscribes the user to a channel if not already subscribed, or unsubscribes if already subscribed.
+  Subscribes the user to a channel if not already subscribed, or unsubscribes if already subscribed and user cannot subscribed to yourself.
 
 - **Get number of channels subscribed by user**  
   Returns the total number of channels the current user is subscribed to.

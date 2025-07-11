@@ -6,6 +6,7 @@ import Profile from './Profile';
 import { Brightness4, Brightness7, Person, ExitToApp, Search } from '@mui/icons-material';
 import { fetchsearchVideos } from '../services/videoService';
 import VideoCard from '../components/VideoCard';
+import { getview } from '../services/videoService';
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -92,6 +93,23 @@ const Home = () => {
     setSearchResults([]);
     setError(null);
   };
+
+  const handleVideoView = async (videoId) => {
+  try {
+    await getview(videoId);
+    
+    // Update local state to reflect the new view count
+    setSearchResults(prevResults => 
+      prevResults.map(video => 
+        video._id === videoId 
+          ? { ...video, views: (video.views || 0) + 1 } 
+          : video
+      )
+    );
+  } catch (err) {
+    console.error('Error incrementing views:', err);
+  }
+};
 
   return (
     <div className={`min-h-screen w-full p-6 transition-all duration-500 ease-in-out ${
@@ -263,6 +281,7 @@ const Home = () => {
                       video={video} 
                       readOnly={true}
                       theme={theme}
+                      onView={() => handleVideoView(video._id)}
                     />
                   ))}
                 </div>

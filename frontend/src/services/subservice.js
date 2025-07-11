@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_BASE_URL;
 
 const togglebtn = async (channelId) => {
     try {
-        const response = await axios.post(`${API_URL}/subscriptions/${channelId}`,{
+        const response = await axios.post(`${API_URL}/subscriptions/toggle/${channelId}`,{
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             }   

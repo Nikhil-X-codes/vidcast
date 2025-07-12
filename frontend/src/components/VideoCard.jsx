@@ -272,7 +272,6 @@ const handleSubscribe = async () => {
   )}
 </div>
 
-      {/* Video Info Section */}
       <div className="p-4">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">

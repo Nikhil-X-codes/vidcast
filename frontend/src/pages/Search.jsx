@@ -248,4 +248,6 @@ const SearchComponent = ({ theme }) => {
   );
 };
 
+
+
 export default SearchComponent;

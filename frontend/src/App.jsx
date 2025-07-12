@@ -11,6 +11,7 @@ import PlaylistManager from './components/PlaylistManager';
 import Like from './components/Like';
 import { ThemeProvider } from './context/Toggle';
 import SubscriptionStats from './components/SubscriptionStats';
+import SearchComponent from './pages/Search';
 
 const App = () => {
   return (
@@ -106,6 +107,19 @@ const App = () => {
               </div>
             }
           />
+        
+                  <Route
+            path="/search"
+            element={
+              <div className="flex">
+                <Sidebar />
+                <div className="flex-1">
+                <SearchComponent/>
+                </div>
+              </div>
+            }
+          />
+
 
 
         </Routes>

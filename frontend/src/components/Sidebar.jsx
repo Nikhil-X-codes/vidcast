@@ -8,6 +8,7 @@ import {
   FaHistory,
   FaBars,
   FaHeart,
+  FaSearch
 } from 'react-icons/fa';
 
 const Sidebar = () => {
@@ -24,6 +25,7 @@ const Sidebar = () => {
     { name: 'Watch History', path: '/history', icon: <FaHistory /> },
     { name: 'Liked Videos', path: '/liked-videos', icon: <FaHeart /> },
     { name: 'My Playlist', path: '/playlist', icon: <FaList /> },
+    { name:'Search',path:'/search',icon:<FaSearch />}
   ];
 
   return (

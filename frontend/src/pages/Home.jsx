@@ -3,22 +3,26 @@ import { useAuth } from '../context/Authcontext';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { useTheme } from '../context/Toggle';
 import Profile from './Profile';
-import { Brightness4, Brightness7, Person, ExitToApp, Search } from '@mui/icons-material';
-import { fetchsearchVideos } from '../services/videoService';
-import VideoCard from '../components/VideoCard';
-import { getview } from '../services/videoService';
+import { Brightness4, Brightness7, Person, ExitToApp } from '@mui/icons-material';
 
 const Home = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [typingText, setTypingText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [typingSpeed, setTypingSpeed] = useState(150);
   const dropdownRef = useRef(null);
-  const searchRef = useRef(null);
   const navigate = useNavigate();
+
+  const phrases = [
+    "Welcome to Vidcast",
+    "Discover amazing videos",
+    "Share your story",
+    "Connect with creators",
+    "Join our community"
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -30,6 +34,36 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const currentPhrase = phrases[currentIndex];
+    let timeout;
+
+    if (!isDeleting && typingText.length < currentPhrase.length) {
+      // Typing phase
+      timeout = setTimeout(() => {
+        setTypingText(currentPhrase.substring(0, typingText.length + 1));
+      }, typingSpeed);
+    } else if (!isDeleting && typingText.length === currentPhrase.length) {
+      // Pause at full phrase
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+        setTypingSpeed(50);
+      }, 2000);
+    } else if (isDeleting && typingText.length > 0) {
+      // Deleting phase
+      timeout = setTimeout(() => {
+        setTypingText(currentPhrase.substring(0, typingText.length - 1));
+      }, typingSpeed);
+    } else if (isDeleting && typingText.length === 0) {
+      // Move to next phrase
+      setIsDeleting(false);
+      setCurrentIndex((currentIndex + 1) % phrases.length);
+      setTypingSpeed(150);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [typingText, currentIndex, isDeleting]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -39,77 +73,6 @@ const Home = () => {
     navigate('profile');
     setDropdownOpen(false);
   };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetchsearchVideos(searchQuery);
-      
-      if (response.data.status === "Videos fetched successfully" && response.data.message?.videos) {
-        const transformedVideos = response.data.message.videos.map(video => ({
-          _id: video['.id'] || video._id,
-          video: video.video,
-          thumbnail: video.thumbnail,
-          owner: video.owner ? {
-            _id: video.owner['.id'] || video.owner._id,
-            username: video.owner.username,
-            avatar: video.owner.avatar
-          } : {
-            _id: 'unknown',
-            username: 'Unknown',
-            avatar: 'https://via.placeholder.com/40'
-          },
-          title: video.title,
-          description: video.description,
-          views: video.views || 0,
-          likes: video.likes || 0,
-          createdAt: video.createdAt,
-          updatedAt: video.updatedAt
-        }));
-        
-        setSearchResults(transformedVideos);
-      } else {
-        setSearchResults([]);
-        setError(response.data.message || 'No videos found');
-      }
-    } catch (err) {
-      console.error('Search error:', err);
-      setError(err.response?.data?.message || 'Failed to fetch search results');
-      setSearchResults([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setError(null);
-  };
-
-  const handleVideoView = async (videoId) => {
-  try {
-    await getview(videoId);
-    
-    // Update local state to reflect the new view count
-    setSearchResults(prevResults => 
-      prevResults.map(video => 
-        video._id === videoId 
-          ? { ...video, views: (video.views || 0) + 1 } 
-          : video
-      )
-    );
-  } catch (err) {
-    console.error('Error incrementing views:', err);
-  }
-};
 
   return (
     <div className={`min-h-screen w-full p-6 transition-all duration-500 ease-in-out ${
@@ -138,49 +101,8 @@ const Home = () => {
       </div>
 
       <div className="relative z-10">
-        {/* Header with search and user controls */}
-        <header className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-          <div className="w-full md:w-auto md:flex-1 md:max-w-2xl">
-            <form onSubmit={handleSearch} className="relative">
-              <div className={`relative flex items-center rounded-full transition-all duration-300 ${
-                theme === 'dark' 
-                  ? 'bg-gray-800/90 backdrop-blur-md border-gray-700 hover:bg-gray-800/80' 
-                  : 'bg-white/90 backdrop-blur-md border-gray-200 hover:bg-white/80'
-              } border px-4 py-2 shadow-lg hover:shadow-xl`}>
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <Search className={`h-5 w-5 ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`} />
-                </div>
-                <input
-                  type="text"
-                  ref={searchRef}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search videos, channels..."
-                  className={`block w-full rounded-md bg-transparent py-2 pl-10 pr-3 ${
-                    theme === 'dark' ? 'text-white placeholder-gray-400' : 'text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2 ${
-                    theme === 'dark' ? 'focus:ring-pink-500' : 'focus:ring-pink-400'
-                  } sm:text-sm`}
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={clearSearch}
-                    className={`absolute right-3 ${
-                      theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'
-                    } transition-colors`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-
+        {/* Header with user controls */}
+        <header className="flex items-center justify-end mb-8 gap-4">
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleTheme}
@@ -246,69 +168,46 @@ const Home = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="mt-8">
-          {/* Search Results Section */}
-          {searchQuery && (
-            <div className="mb-8 animate-fadeIn">
-              <h2 className="text-2xl font-bold mb-4 flex items-center">
-                <Search className="mr-2 text-pink-500" />
-                Search Results for "{searchQuery}"
-              </h2>
-              
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
-                  <span className="ml-3 text-lg">Searching...</span>
-                </div>
-              ) : error ? (
-                <div className={`text-center py-8 rounded-lg ${
-                  theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'
-                }`}>
-                  <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-pink-100 text-pink-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <p className={`text-lg font-medium ${
-                    theme === 'dark' ? 'text-pink-400' : 'text-pink-600'
-                  }`}>{error}</p>
-                </div>
-              ) : searchResults.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {searchResults.map((video) => (
-                    <VideoCard 
-                      key={video._id} 
-                      video={video} 
-                      readOnly={true}
-                      theme={theme}
-                      onView={() => handleVideoView(video._id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className={`text-center py-12 rounded-lg ${
-                  theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'
-                }`}>
-                  <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-pink-100 text-pink-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className={`text-lg font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>No videos found</h3>
-                  <p className={`${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`}>Try different search terms</p>
-                </div>
-              )}
+        <main className="mt-8 flex flex-col items-center justify-center min-h-[70vh] px-4">
+          {/* Enhanced Typewriter Animation */}
+          <div className="text-center mb-12 max-w-4xl">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <span className={`relative ${theme === 'dark' ? 'text-pink-400' : 'text-pink-600'}`}>
+                {typingText}
+                <span className={`absolute -right-3 h-full w-0.5 ${theme === 'dark' ? 'bg-pink-400' : 'bg-pink-600'} animate-blink`}></span>
+              </span>
+            </h1>
+            <p className={`text-xl md:text-2xl mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              The best place to share your videos with the world
+            </p>
+            <div className="flex justify-center space-x-4 mt-8">
+              <button 
+                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-pink-600 hover:bg-pink-700 text-white' 
+                    : 'bg-pink-500 hover:bg-pink-600 text-white'
+                } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+                onClick={() => navigate('/my-video')}
+              >
+                Upload Video
+              </button>
+              <button 
+                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-transparent hover:bg-gray-700/50 text-pink-400 border border-pink-400' 
+                    : 'bg-transparent hover:bg-pink-100 text-pink-600 border border-pink-500'
+                } shadow-lg hover:shadow-xl transform hover:-translate-y-1`}
+                onClick={() => navigate('/search')}
+              >
+                Explore Content
+              </button>
             </div>
-          )}
-
-          <Routes>
-            <Route path="profile" element={<Profile />} />
-          </Routes>
+          </div>
         </main>
+
+        <Routes>
+          <Route path="profile" element={<Profile />} />
+        </Routes>
       </div>
 
       {/* Global styles for animations */}
@@ -321,6 +220,15 @@ const Home = () => {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+
+        .animate-blink {
+          animation: blink 1s step-end infinite;
         }
         
         .animate-fadeIn {

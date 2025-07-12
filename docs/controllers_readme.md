@@ -158,6 +158,13 @@ Returns a list of videos based on query parameters.
 **Description**:  
 Fetches a video’s complete details using its `videoId`.
 
+---
+
+## 6. 📄 Get Search Video based on Query
+
+**Description**:  
+Fetches a video’s Based on title and Description.
+
 
 ## ❤️ Like Functionality
 

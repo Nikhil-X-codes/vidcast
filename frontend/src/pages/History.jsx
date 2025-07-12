@@ -45,7 +45,6 @@ const History = () => {
 
   return (
     <div className={`min-h-screen p-6 ${bgColor} ${textColor} transition-all duration-300`}>
-      {/* Floating decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(15)].map((_, i) => (
           <div 

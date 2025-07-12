@@ -47,3 +47,8 @@ export const getWatchHistory = () =>
     },
     withCredentials: true,
   });
+
+  export const fetchVideoById = (videoId) =>
+  axios.get(`${API_BASE}/videos/single/${videoId}`, {
+    withCredentials: true,
+  });

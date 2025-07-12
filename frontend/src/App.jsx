@@ -12,6 +12,7 @@ import Like from './components/Like';
 import { ThemeProvider } from './context/Toggle';
 import SubscriptionStats from './components/SubscriptionStats';
 import SearchComponent from './pages/Search';
+import SearchVideoPlayer from './pages/searchvideo';
 
 const App = () => {
   return (
@@ -108,18 +109,23 @@ const App = () => {
             }
           />
         
-                  <Route
-            path="/search"
-            element={
-              <div className="flex">
-                <Sidebar />
-                <div className="flex-1">
-                <SearchComponent/>
-                </div>
-              </div>
-            }
-          />
-
+  <Route path="/search" element={
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        <SearchComponent />
+      </div>
+    </div>
+  } />
+  
+  <Route path="/search/:videoId" element={
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">
+        <SearchVideoPlayer />
+      </div>
+    </div>
+  } />
 
 
         </Routes>

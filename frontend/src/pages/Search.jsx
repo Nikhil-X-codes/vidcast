@@ -4,6 +4,7 @@ import VideoCard from '../components/VideoCard';
 import { getview } from '../services/videoService';
 import { Search, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'
 
 const SearchComponent = ({ theme }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,6 +12,7 @@ const SearchComponent = ({ theme }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isFocused, setIsFocused] = useState(false);
+   const navigate = useNavigate();
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -215,6 +217,7 @@ const SearchComponent = ({ theme }) => {
                     readOnly={true}
                     theme={theme}
                     onView={() => handleVideoView(video._id)}
+                    onThumbnailClick={() => navigate(`/search/${video._id}`)}
                   />
                 </motion.div>
               ))}
@@ -236,23 +239,7 @@ const SearchComponent = ({ theme }) => {
               <p className={`max-w-md mx-auto mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 We couldn't find any videos matching your search. Try different keywords or check your spelling.
               </p>
-              <div className="flex flex-wrap justify-center gap-3 max-w-md mx-auto">
-                {['Trending', 'Music', 'Gaming', 'News'].map((suggestion) => (
-                  <motion.button
-                    key={suggestion}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSearchQuery(suggestion)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium ${
-                      theme === 'dark' 
-                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                    } transition-colors`}
-                  >
-                    {suggestion}
-                  </motion.button>
-                ))}
-              </div>
+
             </motion.div>
           )}
         </motion.div>

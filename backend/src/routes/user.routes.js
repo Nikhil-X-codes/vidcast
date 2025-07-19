@@ -32,7 +32,9 @@ userRouter.get('/profile/:username', verifyJWT,UserProfile);
 
 userRouter.get('/watch-history', verifyJWT, Watchhistory);   
 
-
+userRouter.get('/test', (req, res) => {
+  res.send('Users route working ✅');
+});
 
 
 export default userRouter;

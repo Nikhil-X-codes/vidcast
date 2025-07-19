@@ -19,6 +19,9 @@ export default defineConfig(({ mode }) => {
         '/playlists': socketUrl,
       }
     },
+    build: {
+      outDir: 'dist' 
+    },
     plugins: [react(), tailwindcss()],
   }
 })

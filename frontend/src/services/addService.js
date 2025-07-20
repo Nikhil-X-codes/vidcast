@@ -2,10 +2,17 @@ import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_BASE_URL; 
 
+const authHeader = {
+  Authorization: `Bearer ${localStorage.getItem('token')}`,
+};
+
+// Like a video
 export const likeVideo = async (videoId) => {
   try {
-    const response = await axios.post(`${apiUrl}/likes/video/${videoId}`);
-    return response.data; 
+    const response = await axios.post(`${apiUrl}/likes/video/${videoId}`, {}, {
+      headers: authHeader,
+    });
+    return response.data;
   } catch (error) {
     return {
       success: false,
@@ -14,16 +21,15 @@ export const likeVideo = async (videoId) => {
   }
 };
 
-
+// Get liked videos
 export const getLikedVideos = async (page = 1, limit = 10) => {
-
-  try{
-  const response = await axios.get(`${apiUrl}/likes/videos`, {
-    params: { page, limit }
-  });
-   return response.data;
-  }
-  catch (error) {
+  try {
+    const response = await axios.get(`${apiUrl}/likes/videos`, {
+      headers: authHeader,
+      params: { page, limit }
+    });
+    return response.data;
+  } catch (error) {
     return {
       success: false,
       status: error.response?.status || 500,
@@ -33,12 +39,14 @@ export const getLikedVideos = async (page = 1, limit = 10) => {
   }
 };
 
+// Add comment
 export const addComment = async (videoId, commentText) => {
   try {
-    const response = await axios.post(`${apiUrl}/comments/add/${videoId}`, {
-     commentText:commentText
-    },
-   );
+    const response = await axios.post(
+      `${apiUrl}/comments/add/${videoId}`,
+      { commentText },
+      { headers: authHeader }
+    );
     return {
       success: true,
       status: response.status,
@@ -54,15 +62,18 @@ export const addComment = async (videoId, commentText) => {
   }
 };
 
+// Update comment
 export const updateComment = async (commentId, commentText) => {
   try {
-    const response = await axios.patch(`${apiUrl}/comments/update/${commentId}`, {
-      commentText:commentText
-    });
+    const response = await axios.patch(
+      `${apiUrl}/comments/update/${commentId}`,
+      { commentText },
+      { headers: authHeader }
+    );
     return {
       success: true,
       status: response.status,
-      data: response.data 
+      data: response.data
     };
   } catch (error) {
     return {
@@ -74,13 +85,16 @@ export const updateComment = async (commentId, commentText) => {
   }
 };
 
+// Get comments
 export const getComments = async (videoId) => {
   try {
-    const response = await axios.get(`${apiUrl}/comments/${videoId}`);
+    const response = await axios.get(`${apiUrl}/comments/${videoId}`, {
+      headers: authHeader,
+    });
     return {
       success: true,
       status: response.status,
-      data: response.data.data || response.data 
+      data: response.data.data || response.data
     };
   } catch (error) {
     return {
@@ -92,9 +106,12 @@ export const getComments = async (videoId) => {
   }
 };
 
+// Delete comment
 export const deleteComment = async (commentId) => {
   try {
-    const response = await axios.delete(`${apiUrl}/comments/delete/${commentId}`);
+    const response = await axios.delete(`${apiUrl}/comments/delete/${commentId}`, {
+      headers: authHeader,
+    });
     return {
       success: true,
       status: response.status,
@@ -108,17 +125,19 @@ export const deleteComment = async (commentId) => {
       error: error.message
     };
   }
-}
+};
 
+// Get like status
 export const getLikeStatus = async (videoId) => {
-    try {
-    const response = await axios.post(`${apiUrl}/likes/status/${videoId}`);           
-    return response.data; 
+  try {
+    const response = await axios.post(`${apiUrl}/likes/status/${videoId}`, {}, {
+      headers: authHeader,
+    });
+    return response.data;
   } catch (error) {
     return {
       success: false,
-      status: error.response?.data?.message || "Failed to like video"
+      status: error.response?.data?.message || "Failed to get like status"
     };
   }
-}
-
+};

@@ -15,8 +15,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/users/login`, { email, password });
-      
-      // Ensure we have the complete user object
+
       const userData = res.data.data.user;
       
       setUser(userData);
@@ -44,11 +43,12 @@ export const AuthProvider = ({ children }) => {
       if (form.avatar) formData.append('avatar', form.avatar);
       if (form.coverimage) formData.append('coverimage', form.coverimage);
 
-      const res = await axios.post(`${API_BASE_URL}/users/register`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // Correct content type
-        },
-      });
+     const res = await axios.post(`${API_BASE_URL}/users/register`, formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  },
+});
 
       // Auto-login after registration
       if (res.data.success) {

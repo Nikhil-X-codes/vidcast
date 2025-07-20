@@ -4,53 +4,66 @@ const API_BASE = import.meta.env.VITE_BASE_URL ;
 
 export const fetchVideos = () =>
   axios.get(`${API_BASE}/videos/all`, {
-    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
 export const uploadVideo = (formData) =>
   axios.post(`${API_BASE}/videos/upload`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    withCredentials: true,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
 export const fetchsearchVideos = (search) =>
   axios.get(`${API_BASE}/videos/result?search=${search}`, {
-    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
 export const deleteVideo = (videoId) =>
   axios.delete(`${API_BASE}/videos/delete/${videoId}`, {
-    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
-
 
 export const updateVideo = (videoId, title, description) =>
   axios.patch(
     `${API_BASE}/videos/update/${videoId}`,
     { title, description },
     {
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     }
   );
 
-  export const getview = (videoId) =>
+export const getview = (videoId) =>
   axios.get(`${API_BASE}/videos/view/${videoId}`, {
-    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
 export const getWatchHistory = () =>
-  axios.get(`${API_BASE}/users/watch-history`, {  
+  axios.get(`${API_BASE}/users/watch-history`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
-      'Content-Type': 'application/json', 
-      'Accept': 'application/json'       
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
-    withCredentials: true,
   });
 
-  export const fetchVideoById = (videoId) =>
+export const fetchVideoById = (videoId) =>
   axios.get(`${API_BASE}/videos/single/${videoId}`, {
-    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
+
 
   

@@ -10,7 +10,8 @@ import mongoose from "mongoose";
 
 const registeruser = asynchandler(async (req, res) => {
     const { username, email, password } = req.body;
-
+    console.log('success')
+    console.log({ username, email, password });
     if (!username || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
     }
@@ -60,13 +61,11 @@ const registeruser = asynchandler(async (req, res) => {
 
 const loginuser = asynchandler(async (req, res) => {                                   
     const { email, password } = req.body;
-
     if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
     }
-
     const existinguser = await User.findOne({ email });
-
+    console.log('existinguser',existinguser)
     if (!existinguser) {
         return registeruser(req, res); 
     }

@@ -25,13 +25,14 @@ const VideoCard = ({
   readOnly = false,
   hideInteractions = false,
   showComments = true,
-  onThumbnailClick = true,
+  onThumbnailClick = null,
 }) => {
   // State management
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(video.title);
   const [editDesc, setEditDesc] = useState(video.description);
   const [showVideo, setShowVideo] = useState(false);
+  const [viewed, setViewed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(video.likes || 0);
@@ -211,6 +212,16 @@ const handleSubscribe = async () => {
             src={video.video}
             controls
             className="w-full h-full object-cover"
+            onPlay={() => {
+              if (!viewed) {
+                onView(video._id);
+                setViewed(true);
+                const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+                if (!history.includes(video._id)) {
+                  localStorage.setItem('watchHistory', JSON.stringify([...history, video._id]));
+                }
+              }
+            }}
           >
             Your browser does not support the video tag.
           </video>
@@ -220,21 +231,28 @@ const handleSubscribe = async () => {
         src={video.thumbnail}
         alt="thumbnail"
         className="w-full h-full object-cover"
-    onClick={(e) => {
-  e.stopPropagation();
-  setShowVideo(true);
-  onView(video._id); 
-}}
+        onClick={(e) => {
+          // Check if onThumbnailClick prop exists
+          if (onThumbnailClick) {
+            e.stopPropagation(); // Prevent the parent click handler
+            onThumbnailClick();
+          } else {
+            setShowVideo(true);
+          }
+        }}
       />
      
     {isHovered && (
         <div 
           className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50"
-     onClick={(e) => {
-  e.stopPropagation();
-  setShowVideo(true);
-  onView(video._id); 
-}}
+          onClick={(e) => {
+            if (onThumbnailClick) {
+              e.stopPropagation(); // Prevent the parent click handler
+              onThumbnailClick();
+            } else {
+              setShowVideo(true);
+            }
+          }}
         >
           <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
             <svg 

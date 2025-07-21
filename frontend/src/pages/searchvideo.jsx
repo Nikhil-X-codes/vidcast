@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchVideoById } from '../services/videoService';
+import { getview } from '../services/videoService'; 
 import ReactPlayer from 'react-player';
 import { ArrowLeft } from '@mui/icons-material';
 
@@ -9,30 +10,40 @@ const SearchVideoPlayer = () => {
   const navigate = useNavigate();
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewCounted, setViewCounted] = useState(false); 
 
-useEffect(() => {
-  const loadVideo = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchVideoById(videoId);
+  useEffect(() => {
+    const loadVideo = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchVideoById(videoId);
 
-      if (response.data?.status === "Video fetched successfully") {
-        console.log( response.data.message);
-        setVideo(response.data.message);
-      } 
-      else {
-        console.error('Failed to fetch video:', response.data?.message);
+        if (response.data?.status === 'Video fetched successfully') {
+          setVideo(response.data.message);
+        } else {
+          console.error('Failed to fetch video:', response.data?.message);
+        }
+      } catch (err) {
+        console.error('Error fetching video:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error fetching video:', err);
-    } finally {
-      setLoading(false);
+    };
+
+    loadVideo();
+  }, [videoId]);
+
+  // Function to call view count API when video starts playing
+  const handleVideoStart = async () => {
+    if (!viewCounted) {
+      try {
+        await getview(videoId); // Call API to increase view
+        setViewCounted(true);
+      } catch (err) {
+        console.error('Failed to update view count:', err);
+      }
     }
   };
-
-  loadVideo();
-}, [videoId]);
-
 
   if (loading) {
     return (
@@ -67,16 +78,16 @@ useEffect(() => {
           <span className="ml-2">Back to results</span>
         </button>
 
-        <div className="relative pt-[56.25%]"> 
+        <div className="relative pt-[56.25%]">
           <ReactPlayer
             className="absolute top-0 left-0"
-            src={video.video} 
+            src={video.video}
             width="100%"
             height="100%"
             controls
+            onStart={handleVideoStart} 
           />
         </div>
-
       </div>
     </div>
   );

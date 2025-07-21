@@ -47,7 +47,6 @@ const login = async (email, password) => {
      const res = await axios.post(`${API_BASE_URL}/users/register`, formData, {
   headers: {
     'Content-Type': 'multipart/form-data',
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
   },
 });
 

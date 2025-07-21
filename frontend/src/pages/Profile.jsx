@@ -73,7 +73,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const formData = new FormData();
     if (avatarFile) formData.append('avatar', avatarFile);
     if (coverFile) formData.append('coverimage', coverFile);
-
+ 
     try {
       const response = await updateUserImages(formData);
       setUser(prev => ({

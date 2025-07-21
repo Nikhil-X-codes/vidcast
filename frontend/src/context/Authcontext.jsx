@@ -7,21 +7,19 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Initialize from localStorage if available
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
 const login = async (email, password) => {
   try {
-    const res = await axios.post(`${API_BASE_URL}/users/login`, { email, password });
+    const res = await axios.post(`${API_BASE_URL}/users/login`, { email, password }, {
+      withCredentials: true, 
+    });
 
     const userData = res.data.data.user;
-    const accessToken = res.data.accessToken;
-
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', accessToken); 
+    localStorage.setItem('user', JSON.stringify(userData)); 
 
     return true;
   } catch (err) {

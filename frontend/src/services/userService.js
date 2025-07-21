@@ -9,21 +9,15 @@ const handleError = (error) => {
 
 export const getUserProfile = async () => {
   try {
-    const token = localStorage.getItem('token');
-    console.log("Token:", token); 
-
     const res = await axios.get(`${API_BASE_URL}/users/current`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      withCredentials: true,
     });
-
     return res.data.data;
   } catch (error) {
     handleError(error);
+    throw error; 
   }
 };
-
 
 export const updateUsername = async (username) => {
   try {
@@ -31,29 +25,35 @@ export const updateUsername = async (username) => {
       `${API_BASE_URL}/users/update`,
       { username },
       {
+        withCredentials: true, 
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }
     );
     return res.data.user;
   } catch (error) {
     handleError(error);
+    throw error;
   }
 };
 
 export const updateUserImages = async (formData) => {
   try {
-    const res = await axios.patch(`${API_BASE_URL}/users/profile-pictures`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+    const res = await axios.patch(
+      `${API_BASE_URL}/users/profile-pictures`,
+      formData,
+      {
+        withCredentials: true, 
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
     return res.data.data;
   } catch (error) {
     handleError(error);
+    throw error;
   }
 };
 
@@ -63,13 +63,15 @@ export const changePassword = async (currentPassword, newPassword) => {
       `${API_BASE_URL}/users/change-password`,
       { currentPassword, newPassword },
       {
+        withCredentials: true, 
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
         },
       }
     );
     return res.data.message;
   } catch (error) {
     handleError(error);
+    throw error;
   }
 };

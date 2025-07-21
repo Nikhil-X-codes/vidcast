@@ -12,22 +12,25 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post(`${API_BASE_URL}/users/login`, { email, password });
+const login = async (email, password) => {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/users/login`, { email, password });
 
-      const userData = res.data.data.user;
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      return true;
-    } catch (err) {
-      console.error('Login failed:', err.response?.data || err.message);
-      alert(err.response?.data?.message || 'Login failed');
-      return false;
-    }
-  };
+    const userData = res.data.data.user;
+    const accessToken = res.data.accessToken;
+
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', accessToken); 
+
+    return true;
+  } catch (err) {
+    console.error('Login failed:', err.response?.data || err.message);
+    alert(err.response?.data?.message || 'Login failed');
+    return false;
+  }
+};
+
 
   const logout = () => {
     setUser(null);

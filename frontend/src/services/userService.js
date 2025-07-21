@@ -9,17 +9,21 @@ const handleError = (error) => {
 
 export const getUserProfile = async () => {
   try {
+    const token = localStorage.getItem('token');
+    console.log("Token:", token); 
+
     const res = await axios.get(`${API_BASE_URL}/users/current`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${token}`,
       },
-      withCredentials: true,
     });
+
     return res.data.data;
   } catch (error) {
     handleError(error);
   }
 };
+
 
 export const updateUsername = async (username) => {
   try {

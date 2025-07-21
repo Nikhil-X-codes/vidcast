@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { fetchsearchVideos } from '../services/videoService';
 import VideoCard from '../components/VideoCard';
 import { getview } from '../services/videoService';
-import { Search, Close } from '@mui/icons-material';
+import { Search, Close, Brightness4, Brightness7 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/Toggle';
 
 const SearchComponent = ({ theme }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,7 +13,8 @@ const SearchComponent = ({ theme }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isFocused, setIsFocused] = useState(false);
-   const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { theme: contextTheme, toggleTheme } = useTheme();
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -92,6 +94,20 @@ const SearchComponent = ({ theme }) => {
         transition={{ duration: 0.3 }}
         className="max-w-2xl mx-auto mt-8 mb-12"
       >
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-full transition-all duration-300 ${
+              contextTheme === 'dark' 
+                ? 'text-yellow-300 hover:bg-gray-700/50 hover:rotate-12' 
+                : 'text-gray-700 hover:bg-gray-200/50 hover:-rotate-12'
+            }`}
+            aria-label="Toggle theme"
+          >
+            {contextTheme === 'dark' ? <Brightness7 className="w-6 h-6" /> : <Brightness4 className="w-6 h-6" />}
+          </button>
+        </div>
+
         <form onSubmit={handleSearch} className="relative">
           <div className={`relative flex items-center rounded-full transition-all duration-300 ${
             theme === 'dark' 
@@ -239,7 +255,6 @@ const SearchComponent = ({ theme }) => {
               <p className={`max-w-md mx-auto mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 We couldn't find any videos matching your search. Try different keywords or check your spelling.
               </p>
-
             </motion.div>
           )}
         </motion.div>
@@ -247,7 +262,5 @@ const SearchComponent = ({ theme }) => {
     </div>
   );
 };
-
-
 
 export default SearchComponent;
